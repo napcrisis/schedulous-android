@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- onboarding -->
+    <dimen name="icon_size">32dp</dimen>
+    <dimen name="logo_padding">20dp</dimen>
+    <dimen name="logo_height">100dp</dimen>
+    <dimen name="mobile_edittext_width">200dp</dimen>
+    <!-- Common -->
+    <dimen name="default_margin">5dp</dimen>
+</resources>

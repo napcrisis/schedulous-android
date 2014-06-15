@@ -9,16 +9,20 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.schedulous.event.HomeActivity;
 import com.schedulous.server.HttpService;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
+import com.schedulous.utility.HashTable;
 import com.schedulous.utility.ReceiverCallback;
+import com.schedulous.utility.database.MainDatabase;
 
 public class LoginController implements ReceiverCallback {
 	public static final String REGISTRATION_URL = Common.SCHEDULOUS_URL
 			+ "/user/register";
 	public static final String VERIFY_URL = Common.SCHEDULOUS_URL
 			+ "/user/verify";
+	public static final String KEY_AUTHENTICATED_USER = "KEY_AUTHENTICATED_USER";
 	private static final String TAG = LoginController.class
 			.getSimpleName();
 	private Gson gson;
@@ -26,11 +30,12 @@ public class LoginController implements ReceiverCallback {
 	private BroadcastReceiver receiver;
 	private IntentFilter intentFilter;
 	private RegistrationJson currentData;
-	private LoginUIInterface callback;
+	private LoginUI callback;
 
-	public LoginController(Context context, LoginUIInterface callback) {
+	public LoginController(Context context, LoginUI callback) {
 		this.context = context;
 		this.callback = callback;
+		MainDatabase.initMainDB(context);
 		gson = new Gson();
 		intentFilter = new IntentFilter(CallbackReceiver.RECEIVER_CODE);
 		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
@@ -87,7 +92,15 @@ public class LoginController implements ReceiverCallback {
 			context.registerReceiver(receiver, intentFilter);
 		}
 	}
-
+	
+	public boolean onCreateAuthCheck() {
+		if(HashTable.get_entry(KEY_AUTHENTICATED_USER)==null){
+			HomeActivity.startHomeActivity(context);
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public void doAction(Bundle data) {
 		String response = data.getString(HttpService.KEY_JSON);
@@ -107,8 +120,8 @@ public class LoginController implements ReceiverCallback {
 			break;
 		case HttpService.VERIFICATION_REQUEST_CODE:
 			if (Common.SUCCESS.equals(res_json.status)) {
-				Toast.makeText(context, "Authenticated", Toast.LENGTH_LONG)
-						.show();
+				HashTable.insert_entry(KEY_AUTHENTICATED_USER, res_json.user.toStringJson());
+				HomeActivity.startHomeActivity(context);
 			} else {
 				Toast.makeText(context, res_json.message, Toast.LENGTH_LONG)
 						.show();
@@ -148,10 +161,10 @@ public class LoginController implements ReceiverCallback {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private class AuthenticationResponse {
 		public String status;
 		public User user;
 		public String message;
+		
 	}
 }

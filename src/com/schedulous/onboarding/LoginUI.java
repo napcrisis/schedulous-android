@@ -1,5 +1,5 @@
 package com.schedulous.onboarding;
 
-public interface LoginUIInterface {
+public interface LoginUI {
 	public void completeSending();
 }

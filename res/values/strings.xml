@@ -9,9 +9,11 @@
     <string name="mobile_hint">Mobile Number</string>
     <string name="verification_code">4 digit code from SMS</string>
     <string name="mobile_default_country_code">+65</string>
-
+	<!-- chat room -->
+	<string name="chat_input_hint">Send a message</string>
     <!-- Common -->
     <string name="sample">sample text</string>
+    <string name="sample_time">00:00</string>
     <string name="empty"></string>
 
 </resources>

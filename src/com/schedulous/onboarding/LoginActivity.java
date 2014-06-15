@@ -2,6 +2,7 @@ package com.schedulous.onboarding;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,10 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.schedulous.R;
-import com.schedulous.server.HttpService;
-import com.schedulous.utility.ReceiverCallback;
 
-public class LoginActivity extends Activity implements LoginUIInterface {
+public class LoginActivity extends Activity implements LoginUI {
 	private static final String TAG = LoginActivity.class.getSimpleName();
 
 	private OnClickListener button_listener = new OnClickListener() {
@@ -89,7 +88,16 @@ public class LoginActivity extends Activity implements LoginUIInterface {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.v(TAG, "oncreate");
 		setContentView(R.layout.onboard_login_activity);
+
+		controller = new LoginController(getApplicationContext(),
+				LoginActivity.this);
+		isVerifyMode = false;
+
+		if (controller.onCreateAuthCheck()) {
+			return;
+		}
 
 		mobile_field_container = (LinearLayout) findViewById(R.id.ll_mobile_field_container);
 		register = (TextView) findViewById(R.id.tv_register);
@@ -106,10 +114,6 @@ public class LoginActivity extends Activity implements LoginUIInterface {
 
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-
-		controller = new LoginController(getApplicationContext(),
-				LoginActivity.this);
-		isVerifyMode = false;
 
 		super.onCreate(savedInstanceState);
 	}

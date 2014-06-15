@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/default_margin" >
+
+    <ImageView
+        android:id="@+id/iv_profile_picture"
+        android:layout_width="@dimen/display_picture_square"
+        android:layout_height="@dimen/display_picture_square"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="@dimen/default_margin"
+        android:contentDescription="@string/empty" />
+
+    <RelativeLayout
+        android:id="@+id/rl_chat_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/iv_profile_picture"
+        android:padding="@dimen/default_margin" >
+
+        <TextView
+            android:id="@+id/tv_others_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true" />
+
+        <TextView
+            android:id="@+id/tv_message_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/tv_message_content"
+            android:text="@string/sample" />
+
+        <ImageView
+            android:id="@+id/iv_message_status"
+            android:layout_width="@dimen/message_status_square"
+            android:layout_height="@dimen/message_status_square"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/default_margin"
+            android:contentDescription="@string/empty" />
+
+        <TextView
+            android:id="@+id/tv_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@id/iv_message_status"
+            android:text="@string/sample_time" />
+    </RelativeLayout>
+</RelativeLayout>

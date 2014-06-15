@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/ll_chat_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/chat_bar_height"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:paddingTop="@dimen/chat_bar_padding" >
+
+        <EditText
+            android:id="@+id/et_chat_input"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:hint="@string/chat_input_hint"
+            android:inputType="textAutoCorrect" />
+
+        <TextView
+            android:id="@+id/tv_send"
+            android:layout_width="@dimen/send_btn_width"
+            android:layout_height="match_parent"
+            android:background="@drawable/res_colored_button_red"
+            android:text="@string/send"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/line_separator"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/ll_chat_bar"
+        android:background="@color/grey" />
+
+    <ListView
+        android:id="@+id/lv_chat_history"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/line_separator"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

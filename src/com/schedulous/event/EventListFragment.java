@@ -15,6 +15,4 @@ public class EventListFragment extends Fragment {
 			Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_eventlist, container, false);
 	}
-
-	
 }

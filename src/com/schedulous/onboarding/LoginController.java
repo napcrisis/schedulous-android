@@ -9,7 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.schedulous.event.HomeActivity;
+import com.schedulous.HomeActivity;
 import com.schedulous.server.HttpService;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;

@@ -88,6 +88,7 @@ public class LoginActivity extends Activity implements LoginUI {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 		Log.v(TAG, "oncreate");
 		setContentView(R.layout.onboard_login_activity);
 
@@ -114,8 +115,6 @@ public class LoginActivity extends Activity implements LoginUI {
 
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-
-		super.onCreate(savedInstanceState);
 	}
 
 	@Override

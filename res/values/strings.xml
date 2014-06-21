@@ -11,6 +11,8 @@
     <string name="mobile_default_country_code">+65</string>
 	<!-- chat room -->
 	<string name="chat_input_hint">Send a message</string>
+	<!-- Event list  -->
+	<string name="new_group">new group</string>
     <!-- Common -->
     <string name="sample">sample text</string>
     <string name="sample_time">00:00</string>

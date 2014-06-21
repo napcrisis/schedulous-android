@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.schedulous.HomeActivity;
 import com.schedulous.server.HttpService;
+import com.schedulous.utility.AuthenticationManager;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.HashTable;
@@ -22,7 +23,6 @@ public class LoginController implements ReceiverCallback {
 			+ "/user/register";
 	public static final String VERIFY_URL = Common.SCHEDULOUS_URL
 			+ "/user/verify";
-	public static final String KEY_AUTHENTICATED_USER = "KEY_AUTHENTICATED_USER";
 	private static final String TAG = LoginController.class
 			.getSimpleName();
 	private Gson gson;
@@ -94,7 +94,7 @@ public class LoginController implements ReceiverCallback {
 	}
 	
 	public boolean onCreateAuthCheck() {
-		if(HashTable.get_entry(KEY_AUTHENTICATED_USER)==null){
+		if(HashTable.get_entry(AuthenticationManager.AUTH_STR)!=null){
 			HomeActivity.startHomeActivity(context);
 			return true;
 		}
@@ -110,6 +110,7 @@ public class LoginController implements ReceiverCallback {
 		switch (data.getInt(HttpService.KEY_REQUEST_CODE)) {
 		case HttpService.REGISTRATION_REQUEST_CODE:
 			if (Common.SUCCESS.equals(res_json.status)) {
+				currentData.setUserId(res_json.user_id);
 				callback.completeSending();
 			} else {
 				Toast.makeText(
@@ -120,7 +121,8 @@ public class LoginController implements ReceiverCallback {
 			break;
 		case HttpService.VERIFICATION_REQUEST_CODE:
 			if (Common.SUCCESS.equals(res_json.status)) {
-				HashTable.insert_entry(KEY_AUTHENTICATED_USER, res_json.user.toStringJson());
+				AuthenticationManager.storeAuthenticationOnMobile(response);
+				
 				HomeActivity.startHomeActivity(context);
 			} else {
 				Toast.makeText(context, res_json.message, Toast.LENGTH_LONG)
@@ -135,8 +137,9 @@ public class LoginController implements ReceiverCallback {
 		public String country_code;
 		public String mobile_number;
 		public String country;
-		public String device_name;
+		public String device_model;
 		public String code;
+		public String user_id;
 
 		public RegistrationJson(String country_code, String mobile_number)
 				throws Exception {
@@ -150,19 +153,23 @@ public class LoginController implements ReceiverCallback {
 			this.country_code = country_code;
 			this.mobile_number = mobile_number;
 			country = "Singapore";
-			device_name = Common.getDeviceName();
+			device_model = Common.getDeviceName();
 		}
 
 		public void setCode(String authentication_code) throws Exception {
-			if (authentication_code.length() != 4) {
+			if (authentication_code.length() != 5) {
 				throw new Exception("Authentication code has invalid length");
 			}
 			code = authentication_code;
+		}
+		public void setUserId(String user_id) {
+			this.user_id = user_id;
 		}
 	}
 
 	private class AuthenticationResponse {
 		public String status;
+		public String user_id;
 		public User user;
 		public String message;
 		

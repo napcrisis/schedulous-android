@@ -20,13 +20,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.schedulous.onboarding.ContactFinder;
 import com.schedulous.utility.CallbackReceiver;
+import com.schedulous.utility.Common;
 import com.schedulous.utility.OnCompletionCall;
 
 public class HttpService extends IntentService implements OnCompletionCall {
 	public static final String TAG = HttpService.class.getSimpleName();
 	public static final int REGISTRATION_REQUEST_CODE = 1001;
 	public static final int VERIFICATION_REQUEST_CODE = 1002;
+	public static final int SYNC_FRIENDS_REQUEST_CODE = 1003;
 
 	public static final int TYPE_POST = 1;
 	public static final int TYPE_GET = 2;
@@ -152,20 +155,27 @@ public class HttpService extends IntentService implements OnCompletionCall {
 		}
 
 		try {
-			if (serverResponseJson != null
-					&& serverResponseJson.has("messages")
-					&& !serverResponseJson.getBoolean("success")) {
-				JSONObject errorMessage = serverResponseJson
-						.getJSONObject("messages");
-				if (errorMessage.has("Authentication")) {
-					// TODO: logout user
+			if (serverResponseJson.has("status")
+					&& Common.SUCCESS.equals(serverResponseJson
+							.getString("status"))) {
+				switch(requestCode){
+				case SYNC_FRIENDS_REQUEST_CODE:
+					ContactFinder.completeSync(response, getApplicationContext());
+					break;
+				default:
+					startCallBack(response, requestCode);
+					break;
 				}
-				return;
+			} else {
+				Log.wtf(TAG, response);
 			}
 		} catch (JSONException e2) {
 			// TODO: parse failed, add to crashlytics
+			return;
 		}
+	}
 
+	private void startCallBack(String response, int requestCode) {
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
 		broadcastIntent.setAction(CallbackReceiver.RECEIVER_CODE);
@@ -174,6 +184,5 @@ public class HttpService extends IntentService implements OnCompletionCall {
 		data.putInt(KEY_REQUEST_CODE, requestCode);
 		broadcastIntent.putExtras(data);
 		sendBroadcast(broadcastIntent);
-
 	}
 }

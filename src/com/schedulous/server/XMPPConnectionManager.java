@@ -29,7 +29,8 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.schedulous.chat.Chat;
 import com.schedulous.chat.ChatTable;
-import com.schedulous.utility.AuthRememBall;
+import com.schedulous.utility.AuthenticationManager;
+import com.schedulous.utility.AuthenticationManager.Authentication;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.HashTable;
 
@@ -85,13 +86,13 @@ public class XMPPConnectionManager {
 
 	public static XMPPConnectionManager getInstance(Context context) {
 		if (instance == null) {
-			AuthRememBall auth = AuthRememBall.getBall();
+			Authentication auth = AuthenticationManager.digDatabase();
 			if (auth == null) {
 				throw new IllegalStateException(
 						"User has tried to login when they should really been logged out");
 			}
-			instance = new XMPPConnectionManager(context, auth.getUser().id,
-					auth.getUser().xmpp_password);
+			instance = new XMPPConnectionManager(context, auth.user.id,
+					auth.user.xmpp);
 		}
 		return instance;
 	}
@@ -202,9 +203,9 @@ public class XMPPConnectionManager {
 						// TODO: snowtrail
 						return;
 					}
-					AuthRememBall auth = AuthRememBall.getBall();
+					Authentication auth = AuthenticationManager.digDatabase();
 					chat.setStatus(Chat.STATUS_CODE_RECEIVED);
-					if (!chat.getId().equals("" + auth.user_id)) {
+					if (!chat.getId().equals("" + auth.user.id)) {
 						ChatTable.insertSingleChat(chat);
 						Intent broadcastIntent = new Intent();
 						broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);

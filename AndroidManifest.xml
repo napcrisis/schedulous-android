@@ -31,7 +31,7 @@
 
         <meta-data
             android:name="com.crashlytics.ApiKey"
-            android:value="47b1ef3b073ea426cfb9dad03cf26a175293bac4" />
+            android:value="6a19632f8b533b3cf4317cd8a7c41b6862c6252d" />
 
         <activity
             android:name="com.schedulous.onboarding.LoginActivity"

@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.schedulous.R;
 
 public class LoginActivity extends Activity implements LoginUI {
@@ -89,6 +90,7 @@ public class LoginActivity extends Activity implements LoginUI {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 		Log.v(TAG, "oncreate");
 		setContentView(R.layout.onboard_login_activity);
 

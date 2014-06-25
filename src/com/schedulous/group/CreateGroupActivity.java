@@ -1,4 +1,4 @@
-package com.schedulous.chat;
+package com.schedulous.group;
 
 import android.app.ActionBar;
 import android.app.Activity;

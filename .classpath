@@ -4,7 +4,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="lib" path="libs/libphonenumber-6.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/Users/napcrisis/Downloads/libphonenumber-6.1-javadoc.jar!/"/>

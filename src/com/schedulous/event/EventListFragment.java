@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
 import com.schedulous.R;
-import com.schedulous.chat.GroupController;
+import com.schedulous.group.GroupController;
 
 public class EventListFragment extends Fragment {
 	private static final String TAG = EventListFragment.class.getSimpleName();

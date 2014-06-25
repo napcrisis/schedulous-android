@@ -1,10 +1,11 @@
-package com.schedulous.chat;
+package com.schedulous.group;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 
 import com.schedulous.R;
+import com.schedulous.chat.ChatFragment;
 
 public class GroupActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package com.schedulous.chat;
+package com.schedulous.group;
 
 import java.util.ArrayList;
 

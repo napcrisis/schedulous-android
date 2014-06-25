@@ -47,11 +47,11 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.schedulous.chat.CreateGroupActivity"
+            android:name="com.schedulous.group.CreateGroupActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.schedulous.chat.GroupActivity"
+            android:name="com.schedulous.group.GroupActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity

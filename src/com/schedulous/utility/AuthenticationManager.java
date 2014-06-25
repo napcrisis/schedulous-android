@@ -12,7 +12,7 @@ public class AuthenticationManager {
 	public static void logout(Context context) {
 		stored = null;
 		HashTable.insert_entry(AUTH_STR, null);
-		
+
 	}
 
 	public static Authentication digDatabase() {
@@ -26,11 +26,12 @@ public class AuthenticationManager {
 		return stored;
 	}
 
-	public static void storeAuthenticationOnMobile(String server_response) {
+	public static void storeAuthenticationOnMobile(String server_response,
+			String user_id) {
 		Gson gson = new Gson();
-		stored = gson.fromJson(server_response,
-				Authentication.class);
-		HashTable.insert_entry(AUTH_STR, server_response);
+		stored = gson.fromJson(server_response, Authentication.class);
+		stored.user.id = user_id;
+		HashTable.insert_entry(AUTH_STR, gson.toJson(stored));
 	}
 
 	public static boolean isAuthenticated() {

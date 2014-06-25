@@ -1,4 +1,4 @@
-package com.schedulous.server;
+package com.schedulous.utility.server;
 
 import java.lang.ref.WeakReference;
 

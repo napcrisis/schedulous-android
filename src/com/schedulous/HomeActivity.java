@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.schedulous.R;
+import com.schedulous.contacts.ContactFinder;
 import com.schedulous.event.EventListFragment;
-import com.schedulous.onboarding.ContactFinder;
 
 public class HomeActivity extends Activity {
 

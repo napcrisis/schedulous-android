@@ -1,4 +1,4 @@
-package com.schedulous.server;
+package com.schedulous.utility.server;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -20,7 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.schedulous.onboarding.ContactFinder;
+import com.schedulous.contacts.ContactFinder;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.OnCompletionCall;
@@ -30,6 +30,7 @@ public class HttpService extends IntentService implements OnCompletionCall {
 	public static final int REGISTRATION_REQUEST_CODE = 1001;
 	public static final int VERIFICATION_REQUEST_CODE = 1002;
 	public static final int SYNC_FRIENDS_REQUEST_CODE = 1003;
+	public static final int CREATE_GROUP_REQUEST_CODE = 1004;
 
 	public static final int TYPE_POST = 1;
 	public static final int TYPE_GET = 2;

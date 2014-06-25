@@ -1,10 +1,11 @@
-package com.schedulous.onboarding;
+package com.schedulous.contacts;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.joda.time.format.DateTimeFormatter;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -22,19 +24,47 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
-import com.schedulous.server.HttpService;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.schedulous.onboarding.User;
 import com.schedulous.utility.AuthenticationManager;
 import com.schedulous.utility.AuthenticationManager.Authentication;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.HashTable;
 import com.schedulous.utility.database.MainDatabase;
+import com.schedulous.utility.server.HttpService;
 
 public class ContactFinder {
-	private static final String URL_SYNC_PHONEBOOK = Common.SCHEDULOUS_URL+"/user/sync-phonebook";
+	private static final String TAG = ContactFinder.class.getSimpleName();
+	private static final String URL_SYNC_PHONEBOOK = Common.SCHEDULOUS_URL
+			+ "/user/sync-phonebook";
+	private static final String REFERRAL = Common.SCHEDULOUS_URL + "/referral/";
 	private static final String KEY_REGISTERED_CONTACTS = "KEY_REGISTERED_CONTACTS";
+	public static final String SG = "SG";
+
+	public static String make_international_number_from_singapore_number(
+			String mobile_number) throws Exception {
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		PhoneNumber internationalNumber = null;
+		try {
+			internationalNumber = phoneUtil.parse(mobile_number, SG);
+		} catch (NumberParseException e) {
+			throw new Exception("Not a valid number");
+		}
+		boolean isValid = phoneUtil.isValidNumber(internationalNumber);
+		if (!isValid) {
+			throw new Exception("Not a valid number");
+		}
+		String internationalNumberString = phoneUtil.format(
+				internationalNumber, PhoneNumberFormat.INTERNATIONAL);
+		return internationalNumberString;
+	}
 
 	/*
 	 * Goes to server with a list of all user's contacts matches people who are
@@ -48,18 +78,18 @@ public class ContactFinder {
 			ReceivingData rd = gson.fromJson(storedContactsInString,
 					ReceivingData.class);
 			DateTimeFormatter formatter = DateTimeFormat.forPattern(
-					"Y-m-d H:i:s").withLocale(Locale.US);
+					"Y-M-d H:m:s").withLocale(Locale.US);
 			DateTime lastUpdated = formatter.parseDateTime(rd.last_updated);
 			if (!lastUpdated.plusMinutes(10).isAfterNow()) {
 				return;
 			}
 		}
 		Authentication auth = AuthenticationManager.digDatabase();
-		SendingData jsonObj = new SendingData(auth.user.id); 
+		SendingData jsonObj = new SendingData(auth.user.id);
 		ArrayList<User> contacts = getAll(context);
 		for (User user : contacts) {
 			for (String number : user.addressBookPhoneNumbers) {
-				jsonObj.friends.add(new Friend(number, "+65", "Singapore"));
+				jsonObj.contacts.add(number);
 			}
 		}
 		Gson gson = new Gson();
@@ -73,33 +103,32 @@ public class ContactFinder {
 		HashTable.insert_entry(KEY_REGISTERED_CONTACTS, response);
 	}
 
+	public static HashSet<String> getRegisteredFriendNumbers() {
+		String storedString = HashTable.get_entry(KEY_REGISTERED_CONTACTS);
+		Gson gson = new Gson();
+		ReceivingData data = gson.fromJson(storedString, ReceivingData.class);
+		HashSet<String> registered = new HashSet<String>();
+		for (String s : data.registered.keySet()) {
+			registered.add(s);
+		}
+		return registered;
+	}
+
 	static class ReceivingData {
 		String status;
-		ArrayList<String> registered;
+		HashMap<String, String> registered;
 		String last_updated;
 	}
 
 	static class SendingData {
 		String user_id;
-		ArrayList<Friend> friends;
+		ArrayList<String> contacts;
 
 		public SendingData(String user_id) {
 			this.user_id = user_id;
-			this.friends = new ArrayList<Friend>();
+			this.contacts = new ArrayList<String>();
 		}
 
-	}
-
-	static class Friend {
-		public Friend(String mobile_number, String country_code, String country) {
-			this.mobile_number = mobile_number;
-			this.country_code = country_code;
-			this.country = country;
-		}
-
-		String mobile_number;
-		String country_code;
-		String country;
 	}
 
 	public static ArrayList<User> getAll(Context context) {
@@ -178,7 +207,12 @@ public class ContactFinder {
 							if (contact.addressBookPhoneNumbers == null) {
 								contact.addressBookPhoneNumbers = new ArrayList<String>();
 							}
-							contact.addressBookPhoneNumbers.add(phonenumber);
+							try {
+								String number = make_international_number_from_singapore_number(phonenumber);
+								contact.addressBookPhoneNumbers.add(number);
+							} catch (Exception e) {
+								Log.wtf(TAG, "Toss away" + phonenumber);
+							}
 						}
 					}
 				}
@@ -340,4 +374,26 @@ public class ContactFinder {
 		}
 	}
 
+	public static void startSMSView(Context context, String number,
+			String message) {
+		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:"
+				+ number));
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.putExtra("sms_body", message);
+		context.startActivity(intent);
+	}
+
+	public static void inviteUserToSchedulous(Context context, User selectedUser) {
+		Authentication auth = AuthenticationManager.digDatabase();
+		String numbers = "";
+		for (String number : selectedUser.addressBookPhoneNumbers) {
+			numbers += number + ",";
+		}
+		if (numbers.length() != 0) {
+			numbers = numbers.substring(0, numbers.length() - 1);
+		}
+		String message = "I am using Schedulous to plan our next meeting! You can download schedulous at "
+				+ REFERRAL + auth.user.referral_code + ".";
+		startSMSView(context, numbers, message);
+	}
 }

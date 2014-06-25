@@ -15,8 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.schedulous.R;
+import com.schedulous.contacts.ContactFinder;
 
 public class LoginActivity extends Activity implements LoginUI {
 	private static final String TAG = LoginActivity.class.getSimpleName();
@@ -39,7 +39,6 @@ public class LoginActivity extends Activity implements LoginUI {
 								: View.GONE);
 				bottom_text.setVisibility(showMobileField ? View.GONE
 						: View.VISIBLE);
-				// TODO: set or lose focus of keyboard
 				break;
 			case R.id.tv_send:
 				if (isVerifyMode) {
@@ -48,14 +47,19 @@ public class LoginActivity extends Activity implements LoginUI {
 					String country_code = mobile_country_code.getText()
 							.toString();
 					String mobile_number = mobile_field.getText().toString();
-
-					controller.send_number(country_code, mobile_number);
-
-					Toast.makeText(
-							LoginActivity.this,
-							"Sending message to " + country_code + " "
-									+ mobile_number, Toast.LENGTH_LONG).show();
+					try {
+						controller.send_number(country_code + mobile_number);
+						Toast.makeText(
+								LoginActivity.this,
+								"Sending message to " + country_code + " "
+										+ mobile_number, Toast.LENGTH_LONG)
+								.show();
+					} catch (Exception e) {
+						Toast.makeText(LoginActivity.this, e.getMessage(),
+								Toast.LENGTH_LONG).show();
+					}
 				}
+				view.setVisibility(View.INVISIBLE);
 				break;
 			}
 		}
@@ -63,12 +67,24 @@ public class LoginActivity extends Activity implements LoginUI {
 	private OnKeyListener mobile_field_listener = new OnKeyListener() {
 		@Override
 		public boolean onKey(View view, int arg1, KeyEvent arg2) {
-			boolean showSendButton = ((EditText) view).getText().length() > 7;
-			if (isVerifyMode) {
-				showSendButton = ((EditText) view).getText().length() > 3;
+			String number = ((EditText) view).getText().toString();
+			boolean showSendButton = number.length() > 7;
+			if (showSendButton) {
+				try {
+					ContactFinder.make_international_number_from_singapore_number(mobile_country_code
+									.getText() + number);
+				} catch (Exception e) {
+					Toast.makeText(LoginActivity.this, e.getMessage(),
+							Toast.LENGTH_LONG).show();
+					showSendButton = false;
+				}
 			}
-			if (!send.isShown() && showSendButton)
+			if (isVerifyMode) {
+				showSendButton = number.length() > 3;
+			}
+			if (!send.isShown() && showSendButton) {
 				send.startAnimation(mFadeIn);
+			}
 			send.setVisibility(showSendButton ? View.VISIBLE : View.INVISIBLE);
 			return false;
 		}
@@ -90,10 +106,9 @@ public class LoginActivity extends Activity implements LoginUI {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Crashlytics.start(this);
 		Log.v(TAG, "oncreate");
 		setContentView(R.layout.onboard_login_activity);
-
+		getActionBar().hide();
 		controller = new LoginController(getApplicationContext(),
 				LoginActivity.this);
 		isVerifyMode = false;
@@ -128,6 +143,7 @@ public class LoginActivity extends Activity implements LoginUI {
 
 		Toast.makeText(this, "Awaiting message", Toast.LENGTH_LONG).show();
 		isVerifyMode = true;
+		send.setVisibility(View.VISIBLE);
 		// TODO: loading icon & start broadcast receiver
 	}
 

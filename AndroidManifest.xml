@@ -19,12 +19,12 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service
-            android:name="com.schedulous.server.HttpService"
+            android:name="com.schedulous.utility.server.HttpService"
             android:enabled="true"
             android:exported="false" >
         </service>
         <service
-            android:name="com.schedulous.server.XMPPService"
+            android:name="com.schedulous.utility.server.XMPPService"
             android:enabled="true"
             android:exported="false" >
         </service>
@@ -47,7 +47,11 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.schedulous.chat.RoomActivity"
+            android:name="com.schedulous.chat.CreateGroupActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.schedulous.chat.GroupActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity

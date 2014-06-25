@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import com.schedulous.R;
 
-public class RoomActivity extends Activity {
+public class GroupActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

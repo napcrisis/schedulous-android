@@ -1,4 +1,4 @@
-package com.schedulous.server;
+package com.schedulous.utility.server;
 
 import java.io.IOException;
 import java.util.Date;

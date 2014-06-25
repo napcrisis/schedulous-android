@@ -7,7 +7,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,10 +16,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
 import com.schedulous.R;
+import com.schedulous.chat.GroupController;
 
 public class EventListFragment extends Fragment {
 	private static final String TAG = EventListFragment.class.getSimpleName();
@@ -158,7 +157,7 @@ public class EventListFragment extends Fragment {
 
 		@Override
 		public int getItemViewType(int position) {
-			return ((EventDisplayObjects) getItem(position)).type;
+			return getItem(position).type;
 		}
 
 		@Override
@@ -167,7 +166,7 @@ public class EventListFragment extends Fragment {
 		}
 
 		@Override
-		public Object getItem(int position) {
+		public EventDisplayObjects getItem(int position) {
 			return fake_data.get(position);
 		}
 
@@ -185,7 +184,7 @@ public class EventListFragment extends Fragment {
 		public View getView(int position, View view, ViewGroup parent) {
 			View rootView = (View) mInflator.inflate(R.layout.row_event, null);
 			TextView tv = (TextView) rootView.findViewById(R.id.tv_text);
-			EventDisplayObjects item = (EventDisplayObjects) getItem(position);
+			EventDisplayObjects item = getItem(position);
 			tv.setText(item.mainText);
 			switch (item.type) {
 			case EventDisplayObjects.DATA_TYPE:
@@ -225,7 +224,7 @@ public class EventListFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		ListView rootView = (ListView) inflater.inflate(
-				R.layout.fragment_eventlist, container, false);
+				R.layout.fragment_pinned_listview, container, false);
 		EventListAdapter adapter = new EventListAdapter(getActivity());
 		rootView.setAdapter(adapter);
 		setHasOptionsMenu(true);
@@ -235,14 +234,14 @@ public class EventListFragment extends Fragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.event_list_menu, menu);
+		inflater.inflate(R.menu.menu_event_list, menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.item_create_group:
-			Toast.makeText(getActivity(), "done", Toast.LENGTH_LONG).show();
+			GroupController.startCreateGroupActivity(getActivity());
 			break;
 		}
 		return super.onOptionsItemSelected(item);

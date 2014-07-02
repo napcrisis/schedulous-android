@@ -16,11 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.schedulous.R;
-import com.schedulous.contacts.ContactFinder;
+import com.schedulous.contacts.ContactController;
 
 public class LoginActivity extends Activity implements LoginUI {
 	private static final String TAG = LoginActivity.class.getSimpleName();
-
 	private OnClickListener button_listener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
@@ -71,7 +70,7 @@ public class LoginActivity extends Activity implements LoginUI {
 			boolean showSendButton = number.length() > 7;
 			if (showSendButton) {
 				try {
-					ContactFinder.make_international_number_from_singapore_number(mobile_country_code
+					ContactController.make_international_number_from_singapore_number(mobile_country_code
 									.getText() + number);
 				} catch (Exception e) {
 					Toast.makeText(LoginActivity.this, e.getMessage(),
@@ -157,6 +156,12 @@ public class LoginActivity extends Activity implements LoginUI {
 	protected void onResume() {
 		super.onResume();
 		controller.onResume();
+	}
+
+	@Override
+	public void receivedVerificationCode(String code) {
+		mobile_field.setText(code);
+		send.performClick();
 	}
 
 }

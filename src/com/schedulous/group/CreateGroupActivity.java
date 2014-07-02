@@ -10,13 +10,13 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.schedulous.R;
-import com.schedulous.contacts.ContactFinder;
+import com.schedulous.contacts.ContactController;
+import com.schedulous.contacts.User;
 import com.schedulous.contacts.UserListFragment;
 import com.schedulous.contacts.UserListUI;
-import com.schedulous.onboarding.User;
 
 public class CreateGroupActivity extends Activity implements UserListUI {
-
+	GroupController controller;
 	private UserListFragment user_list;
 	private EditText group_name;
 
@@ -39,6 +39,7 @@ public class CreateGroupActivity extends Activity implements UserListUI {
 		user_list = (UserListFragment) getFragmentManager().findFragmentById(
 				R.id.fragment_userlist);
 		user_list.setMultipleSelection(false);
+		controller = GroupController.get(this);
 	}
 
 	@Override
@@ -58,8 +59,8 @@ public class CreateGroupActivity extends Activity implements UserListUI {
 			finish();
 			break;
 		case R.id.item_group_create:
-			GroupController.makeGroup(this, user_list.getSelectedUsers(),
-					group_name.getText().toString());
+			controller.makeGroup(this, user_list.getSelectedUsers(), group_name
+					.getText().toString());
 			break;
 		case R.id.item_group_toggle:
 			toggleBack.setVisible(true);
@@ -87,7 +88,19 @@ public class CreateGroupActivity extends Activity implements UserListUI {
 		if (user.userType == User.SCHEDULOUS_USER) {
 			GroupController.startChatActivity(this, user);
 		} else {
-			ContactFinder.inviteUserToSchedulous(this, user);
+			ContactController.inviteUserToSchedulous(this, user);
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		controller.onPause();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		controller.onResume();
+		super.onResume();
 	}
 }

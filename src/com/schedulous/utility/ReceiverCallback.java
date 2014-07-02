@@ -4,5 +4,10 @@ import android.os.Bundle;
 
 
 public interface ReceiverCallback extends Callback {
-	public void doAction(Bundle data);
+	/*
+	 * (non-Javadoc)
+	 * @see com.schedulous.utility.Callback#doAction(android.os.Bundle)
+	 * UI Action only!
+	 */
+	public void doAction(Bundle data, String action);
 }

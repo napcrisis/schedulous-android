@@ -20,7 +20,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.schedulous.contacts.ContactFinder;
+import com.schedulous.contacts.ContactController;
+import com.schedulous.contacts.User;
+import com.schedulous.group.Group;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.OnCompletionCall;
@@ -31,6 +33,8 @@ public class HttpService extends IntentService implements OnCompletionCall {
 	public static final int VERIFICATION_REQUEST_CODE = 1002;
 	public static final int SYNC_FRIENDS_REQUEST_CODE = 1003;
 	public static final int CREATE_GROUP_REQUEST_CODE = 1004;
+	public static final int GET_USER_INFO_REQUEST_CODE = 1005;
+	public static final int GROUP_LIST_REQUEST_CODE = 1006;
 
 	public static final int TYPE_POST = 1;
 	public static final int TYPE_GET = 2;
@@ -159,10 +163,20 @@ public class HttpService extends IntentService implements OnCompletionCall {
 			if (serverResponseJson.has("status")
 					&& Common.SUCCESS.equals(serverResponseJson
 							.getString("status"))) {
-				switch(requestCode){
+				switch (requestCode) {
 				case SYNC_FRIENDS_REQUEST_CODE:
-					ContactFinder.completeSync(response, getApplicationContext());
+					ContactController.completeSync(response,
+							getApplicationContext());
 					break;
+				case GET_USER_INFO_REQUEST_CODE:
+					User.saveResponse(response, getApplicationContext());
+					break;
+				case CREATE_GROUP_REQUEST_CODE:
+					Group.queryServer(getApplicationContext());
+					startCallBack(response, requestCode);
+					break;
+				case GROUP_LIST_REQUEST_CODE:
+					Group.saveResponse(response, getApplicationContext());
 				default:
 					startCallBack(response, requestCode);
 					break;

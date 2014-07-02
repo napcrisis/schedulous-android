@@ -9,5 +9,6 @@
 			<attribute name="javadoc_location" value="jar:file:/Users/napcrisis/Downloads/libphonenumber-6.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

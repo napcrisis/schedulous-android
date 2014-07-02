@@ -8,14 +8,14 @@ import android.util.Log;
 
 public class HashTable extends MainDatabase {
 	
-	public static final String HASH_TABLE_DUMP = "dump";
+	public static final String TABLE_NAME = "dump";
 	public static final String HASH_COLUMN_ID = "_id";
 	public static final String HASH_COLUMN_CONTENT = "content";
 	
 	public static final String[] COLUMN_DATA = { HASH_COLUMN_CONTENT };
 	
 	
-	public static final String TABLE_CREATE = "create table " + HASH_TABLE_DUMP + "("
+	public static final String TABLE_CREATE = "create table " + TABLE_NAME + "("
 			+ HASH_COLUMN_ID + " text not null, " + HASH_COLUMN_CONTENT
 			+ " text not null);";
 	
@@ -25,17 +25,17 @@ public class HashTable extends MainDatabase {
 		values.put(HASH_COLUMN_CONTENT, data);
 		String before = get_entry(entry_id);
 		if (before!= null) {
-			getDatabase().delete(HASH_TABLE_DUMP, HASH_COLUMN_ID + "=?",
+			getDatabase().delete(TABLE_NAME, HASH_COLUMN_ID + "=?",
 					new String[] { entry_id });
 		}
-		getDatabase().replace(HASH_TABLE_DUMP, null, values);
+		getDatabase().replace(TABLE_NAME, null, values);
 		Log.v("hashTable", "inserted: " + data + " to " + entry_id);
 	}
 
 	public static String get_entry(String entry_id) {
 		Cursor cursor = null;
 		try {
-			cursor = getDatabase().query(HASH_TABLE_DUMP, COLUMN_DATA,
+			cursor = getDatabase().query(TABLE_NAME, COLUMN_DATA,
 					HASH_COLUMN_ID + "='" + entry_id + "'", null, null, null,
 					null);
 			cursor.moveToFirst();
@@ -52,7 +52,7 @@ public class HashTable extends MainDatabase {
 	}
 	
 	public static void delete_entry(String entry_id){
-		getDatabase().delete(HASH_TABLE_DUMP, HASH_COLUMN_ID + "=?",
+		getDatabase().delete(TABLE_NAME, HASH_COLUMN_ID + "=?",
 				new String[] { entry_id });
 	}
 }

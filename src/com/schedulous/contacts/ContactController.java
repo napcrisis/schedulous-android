@@ -5,13 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -32,21 +26,23 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.schedulous.onboarding.User;
+import com.schedulous.R;
 import com.schedulous.utility.AuthenticationManager;
 import com.schedulous.utility.AuthenticationManager.Authentication;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.HashTable;
-import com.schedulous.utility.database.MainDatabase;
+import com.schedulous.utility.TimeUtility;
 import com.schedulous.utility.server.HttpService;
 
-public class ContactFinder {
-	private static final String TAG = ContactFinder.class.getSimpleName();
+public class ContactController {
+	private static final String TAG = ContactController.class.getSimpleName();
 	private static final String URL_SYNC_PHONEBOOK = Common.SCHEDULOUS_URL
 			+ "/user/sync-phonebook";
+
 	private static final String REFERRAL = Common.SCHEDULOUS_URL + "/referral/";
-	private static final String KEY_REGISTERED_CONTACTS = "KEY_REGISTERED_CONTACTS";
 	public static final String SG = "SG";
+	public static final String KEY_LAST_QUERIED_TIMESTAMP_USER = "KEY_LAST_QUERIED_TIMESTAMP_USER";
+	private static ArrayList<User> phoneBook;
 
 	public static String make_international_number_from_singapore_number(
 			String mobile_number) throws Exception {
@@ -70,22 +66,14 @@ public class ContactFinder {
 	 * Goes to server with a list of all user's contacts matches people who are
 	 * also registered on schedulous
 	 */
-	public static void requestMatchFriendList(Context context) {
-		String storedContactsInString = HashTable
-				.get_entry(KEY_REGISTERED_CONTACTS);
-		if (!Common.isNullOrEmpty(storedContactsInString)) {
-			Gson gson = new Gson();
-			ReceivingData rd = gson.fromJson(storedContactsInString,
-					ReceivingData.class);
-			DateTimeFormatter formatter = DateTimeFormat.forPattern(
-					"Y-M-d H:m:s").withLocale(Locale.US);
-			DateTime lastUpdated = formatter.parseDateTime(rd.last_updated);
-			if (!lastUpdated.plusMinutes(10).isAfterNow()) {
-				return;
-			}
+	public static void query(Context context) {
+		String lastCheckDateTime = HashTable
+				.get_entry(KEY_LAST_QUERIED_TIMESTAMP_USER);
+		if (!TimeUtility.isTenMinutesLater(lastCheckDateTime)) {
+			return;
 		}
-		Authentication auth = AuthenticationManager.digDatabase();
-		SendingData jsonObj = new SendingData(auth.user.id);
+		Authentication auth = AuthenticationManager.getAuth();
+		SendingData jsonObj = new SendingData(auth.user.user_id);
 		ArrayList<User> contacts = getAll(context);
 		for (User user : contacts) {
 			for (String number : user.addressBookPhoneNumbers) {
@@ -99,19 +87,15 @@ public class ContactFinder {
 	}
 
 	public static void completeSync(String response, Context context) {
-		MainDatabase.initMainDB(context);
-		HashTable.insert_entry(KEY_REGISTERED_CONTACTS, response);
-	}
-
-	public static HashSet<String> getRegisteredFriendNumbers() {
-		String storedString = HashTable.get_entry(KEY_REGISTERED_CONTACTS);
 		Gson gson = new Gson();
-		ReceivingData data = gson.fromJson(storedString, ReceivingData.class);
-		HashSet<String> registered = new HashSet<String>();
-		for (String s : data.registered.keySet()) {
-			registered.add(s);
+		ReceivingData rd = gson.fromJson(response, ReceivingData.class);
+		if (Common.SUCCESS.equals(rd.status)) {
+			ArrayList<String> ids = new ArrayList<String>();
+			for (String id : rd.registered.keySet()) {
+				ids.add(rd.registered.get(id));
+			}
+			User.queryServer(ids, context);
 		}
-		return registered;
 	}
 
 	static class ReceivingData {
@@ -121,10 +105,12 @@ public class ContactFinder {
 	}
 
 	static class SendingData {
+		Authentication auth;
 		String user_id;
 		ArrayList<String> contacts;
 
 		public SendingData(String user_id) {
+			auth = AuthenticationManager.getAuthServerToken();
 			this.user_id = user_id;
 			this.contacts = new ArrayList<String>();
 		}
@@ -132,7 +118,10 @@ public class ContactFinder {
 	}
 
 	public static ArrayList<User> getAll(Context context) {
-		return getAll(context, false);
+		if (phoneBook == null && context != null) {
+			phoneBook = getAll(context, true);
+		}
+		return phoneBook;
 	}
 
 	@SuppressLint("UseSparseArrays")
@@ -160,8 +149,6 @@ public class ContactFinder {
 			try {
 				people = cr.query(uri, projection, null, null, null);
 			} catch (RuntimeException e) {
-				// https://jumpcam.atlassian.net/browse/JCA-428
-				// some devices don't have PHOTO_THUMBNAIL_URI?
 				if (withPhoto) {
 					return getAll(context, false);
 				} else {
@@ -211,7 +198,7 @@ public class ContactFinder {
 								String number = make_international_number_from_singapore_number(phonenumber);
 								contact.addressBookPhoneNumbers.add(number);
 							} catch (Exception e) {
-								Log.wtf(TAG, "Toss away" + phonenumber);
+								Log.i(TAG, "Toss away" + phonenumber);
 							}
 						}
 					}
@@ -384,7 +371,7 @@ public class ContactFinder {
 	}
 
 	public static void inviteUserToSchedulous(Context context, User selectedUser) {
-		Authentication auth = AuthenticationManager.digDatabase();
+		Authentication auth = AuthenticationManager.getAuth();
 		String numbers = "";
 		for (String number : selectedUser.addressBookPhoneNumbers) {
 			numbers += number + ",";
@@ -392,8 +379,41 @@ public class ContactFinder {
 		if (numbers.length() != 0) {
 			numbers = numbers.substring(0, numbers.length() - 1);
 		}
-		String message = "I am using Schedulous to plan our next meeting! You can download schedulous at "
+		String message = context.getResources().getString(R.string.invite_text)
 				+ REFERRAL + auth.user.referral_code + ".";
 		startSMSView(context, numbers, message);
+	}
+
+	public static final int DETAIL_PICTURE = 1;
+	public static final int DETAIL_NAME = 2;
+
+	public static String findDetails(String international_number,
+			Context context, int detail_reference) {
+		if (phoneBook == null) {
+			getAll(context);
+		}
+		for (User u : phoneBook) {
+			boolean match = false;
+			for (String num : u.addressBookPhoneNumbers) {
+				if (international_number.equals(num)) {
+					match = true;
+					break;
+				}
+			}
+			if (match) {
+				switch (detail_reference) {
+				case DETAIL_NAME:
+					return u.name;
+				case DETAIL_PICTURE:
+					return u.profile_pic;
+				}
+			}
+		}
+		switch (detail_reference) {
+		case DETAIL_NAME:
+			return international_number;
+		default:
+			return null;
+		}
 	}
 }

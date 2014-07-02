@@ -21,7 +21,7 @@ public class ChatTable extends MainDatabase {
 			"message", "user_id", "status", "_id", "unique_chat_id",
 			"display_photo" };
 
-	public static final String CREATE_TABLE_SQL = "create table " + TABLE_NAME
+	public static final String TABLE_CREATE = "create table " + TABLE_NAME
 			+ " (" + ALL_COLUMNS[ROOM_ID] + " text not null, "
 			+ ALL_COLUMNS[DATETIME_RECEIVED] + " datetime, "
 			+ ALL_COLUMNS[MESSAGE] + " text not null, " + ALL_COLUMNS[FROM]

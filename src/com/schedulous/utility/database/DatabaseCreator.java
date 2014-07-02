@@ -5,13 +5,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.schedulous.chat.ChatTable;
+import com.schedulous.contacts.UserTable;
+import com.schedulous.group.GroupTable;
 import com.schedulous.utility.HashTable;
 
 public class DatabaseCreator extends SQLiteOpenHelper {
 	public static final String TAG = DatabaseCreator.class.getSimpleName();
 	private static final String DATABASE_NAME = "schedulous.db";
-	private static final int DATABASE_VERSION = 19;
-
+	private static final int DATABASE_VERSION = 21;
 
 	public DatabaseCreator(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,6 +22,9 @@ public class DatabaseCreator extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase database) {
 		database.execSQL(HashTable.TABLE_CREATE);
+		database.execSQL(ChatTable.TABLE_CREATE);
+		database.execSQL(UserTable.TABLE_CREATE);
+		database.execSQL(GroupTable.TABLE_CREATE);
 	}
 
 	@Override
@@ -31,7 +36,10 @@ public class DatabaseCreator extends SQLiteOpenHelper {
 	}
 
 	public void clearDatabase(SQLiteDatabase database) {
-		database.execSQL("DROP TABLE IF EXISTS " + HashTable.HASH_TABLE_DUMP);
+		database.execSQL("DROP TABLE IF EXISTS " + HashTable.TABLE_NAME);
+		database.execSQL("DROP TABLE IF EXISTS " + ChatTable.TABLE_NAME);
+		database.execSQL("DROP TABLE IF EXISTS " + UserTable.TABLE_NAME);
+		database.execSQL("DROP TABLE IF EXISTS " + GroupTable.TABLE_NAME);
 		onCreate(database);
-	}	
+	}
 }

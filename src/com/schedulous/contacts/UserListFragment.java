@@ -2,7 +2,6 @@ package com.schedulous.contacts;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -26,7 +25,6 @@ import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.schedulous.R;
 import com.schedulous.contacts.UserListFragment.UserAdapter.ViewHolder;
-import com.schedulous.onboarding.User;
 import com.schedulous.utility.Common;
 
 public class UserListFragment extends Fragment {
@@ -62,21 +60,10 @@ public class UserListFragment extends Fragment {
 			mImageLoader = ImageLoader.getInstance();
 			mInflater = LayoutInflater.from(context);
 			displayData = new ArrayList<User>();
-			ArrayList<User> contacts = ContactFinder.getAll(context);
+			ArrayList<User> contacts = ContactController.getAll(context);
 			Collections.sort(contacts);
-			registeredUsers = new ArrayList<User>();
-			HashSet<String> registeredNumbers = ContactFinder
-					.getRegisteredFriendNumbers();
-			for (int index = contacts.size() - 1; index >= 0; index--) {
-				contacts.get(index).rowType = User.ROW_TYPE;
-				for (String number : contacts.get(index).addressBookPhoneNumbers) {
-					if (registeredNumbers.contains(number)) {
-						registeredUsers.add(contacts.get(index));
-						contacts.remove(index);
-						break;
-					}
-				}
-			}
+			registeredUsers = User.getAllFriends();
+			User.removeFriendsFromContacts(contacts);
 			unregisteredUsers = contacts;
 			headerForRegistered = new User(User.SECTION_TYPE,
 					"Schedulous Users");
@@ -103,12 +90,14 @@ public class UserListFragment extends Fragment {
 			ArrayList<User> filteredRegisteredUsers = new ArrayList<User>();
 			ArrayList<User> filteredUnregisteredUsers = new ArrayList<User>();
 			for (User user : registeredUsers) {
-				if (user.name.contains(searchString)) {
+				if (!Common.isNullOrEmpty(user.name)
+						&& user.name.contains(searchString)) {
 					filteredRegisteredUsers.add(user);
 				}
 			}
 			for (User user : unregisteredUsers) {
-				if (user.name.contains(searchString)) {
+				if (!Common.isNullOrEmpty(user.name)
+						&& user.name.contains(searchString)) {
 					filteredUnregisteredUsers.add(user);
 				}
 			}
@@ -207,8 +196,14 @@ public class UserListFragment extends Fragment {
 				holder.profile_picture
 						.setImageResource(R.drawable.ic_profile_picture);
 			} else {
-				mImageLoader.displayImage(currentUser.profile_pic,
-						holder.profile_picture);
+				if (currentUser.profile_pic.startsWith("content://")) {
+					holder.profile_picture.setImageBitmap(ContactController
+							.loadContactPhotoThumbnail(currentUser.profile_pic,
+									getActivity().getContentResolver()));
+				} else {
+					mImageLoader.displayImage(currentUser.profile_pic,
+							holder.profile_picture);
+				}
 			}
 			return holder.parent;
 		}

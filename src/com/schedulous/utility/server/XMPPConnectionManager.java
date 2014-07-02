@@ -86,12 +86,12 @@ public class XMPPConnectionManager {
 
 	public static XMPPConnectionManager getInstance(Context context) {
 		if (instance == null) {
-			Authentication auth = AuthenticationManager.digDatabase();
+			Authentication auth = AuthenticationManager.getAuth();
 			if (auth == null) {
 				throw new IllegalStateException(
 						"User has tried to login when they should really been logged out");
 			}
-			instance = new XMPPConnectionManager(context, auth.user.id,
+			instance = new XMPPConnectionManager(context, auth.user.user_id,
 					auth.user.xmpp);
 		}
 		return instance;
@@ -203,9 +203,9 @@ public class XMPPConnectionManager {
 						// TODO: snowtrail
 						return;
 					}
-					Authentication auth = AuthenticationManager.digDatabase();
+					Authentication auth = AuthenticationManager.getAuth();
 					chat.setStatus(Chat.STATUS_CODE_RECEIVED);
-					if (!chat.getId().equals("" + auth.user.id)) {
+					if (!chat.getId().equals("" + auth.user.user_id)) {
 						ChatTable.insertSingleChat(chat);
 						Intent broadcastIntent = new Intent();
 						broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);

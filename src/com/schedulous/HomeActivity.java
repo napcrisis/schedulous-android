@@ -7,22 +7,21 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.schedulous.R;
-import com.schedulous.contacts.ContactFinder;
-import com.schedulous.event.EventListFragment;
+import com.schedulous.contacts.ContactController;
 
 public class HomeActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ContactFinder.requestMatchFriendList(this);
+		ContactController.query(this);
 		setContentView(R.layout.activity_fragment_holder);
 		
 		getActionBar().setLogo(R.drawable.ic_header);
 		getActionBar().setTitle(R.string.empty);
 		
 		if (getFragmentManager().findFragmentById(R.id.fragment_container) == null) {
-			Fragment fragment = new EventListFragment();
+			Fragment fragment = new HomeListFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.fragment_container, fragment).commit();
 		}
@@ -30,7 +29,7 @@ public class HomeActivity extends Activity {
 
 	public static void startHomeActivity(Context context) {
 		Intent startIntent = new Intent(context, HomeActivity.class);
-		startIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+		startIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
 				| Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(startIntent);
 	}

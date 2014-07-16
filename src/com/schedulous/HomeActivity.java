@@ -1,15 +1,13 @@
 package com.schedulous;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.schedulous.R;
 import com.schedulous.contacts.ContactController;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends ParentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -8,11 +8,14 @@ import android.os.Bundle;
 
 public class CallbackReceiver extends BroadcastReceiver {
 	public static final String RECEIVER_CODE = CallbackReceiver.class.getSimpleName();
-	private Callback callback;
+	private static Callback callback;
 	public IntentFilter intentFilter;
-	
+	public CallbackReceiver(){
+		super();
+	}
 	public CallbackReceiver(Callback callback) {
-		this.callback = callback;
+		this();
+		CallbackReceiver.callback = callback;
 		intentFilter = new IntentFilter(CallbackReceiver.RECEIVER_CODE);
 		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
 	}

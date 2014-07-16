@@ -12,12 +12,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
-import com.schedulous.group.Group;
+import com.schedulous.group.Room;
+import com.schedulous.group.GroupActivity;
 import com.schedulous.group.GroupController;
 
 public class HomeListFragment extends Fragment {
@@ -27,23 +30,23 @@ public class HomeListFragment extends Fragment {
 	class EventListAdapter extends BaseAdapter implements
 			PinnedSectionListAdapter {
 
-		public ArrayList<EventDisplayObjects> list;
+		public ArrayList<DisplayObjects> list;
 		LayoutInflater mInflator;
 		boolean firstLoad = true;
+
 		public EventListAdapter(Context context) {
 			super();
 			mInflator = LayoutInflater.from(context);
-			list = new ArrayList<HomeListFragment.EventDisplayObjects>();
+			list = new ArrayList<HomeListFragment.DisplayObjects>();
 		}
 
 		public void refresh() {
 			list.clear();
-			ArrayList<Group> groups = Group.getAll();
+			ArrayList<Room> groups = Room.getAll();
 			if (groups.size() > 0) {
-				list.add(new EventDisplayObjects("Chat",
-						EventDisplayObjects.HEADER_TYPE));
-				for (Group g : groups) {
-					list.add(new EventDisplayObjects(g));
+				list.add(new DisplayObjects("Chat", DisplayObjects.HEADER_TYPE));
+				for (Room g : groups) {
+					list.add(new DisplayObjects(g));
 				}
 			}
 			if (firstLoad) {
@@ -56,7 +59,7 @@ public class HomeListFragment extends Fragment {
 		// return 'true' for all view types to pin
 		@Override
 		public boolean isItemViewTypePinned(int viewType) {
-			return viewType == EventDisplayObjects.HEADER_TYPE;
+			return viewType == DisplayObjects.HEADER_TYPE;
 		}
 
 		@Override
@@ -70,7 +73,7 @@ public class HomeListFragment extends Fragment {
 		}
 
 		@Override
-		public EventDisplayObjects getItem(int position) {
+		public DisplayObjects getItem(int position) {
 			return list.get(position);
 		}
 
@@ -88,15 +91,15 @@ public class HomeListFragment extends Fragment {
 		public View getView(int position, View view, ViewGroup parent) {
 			View rootView = (View) mInflator.inflate(R.layout.row_event, null);
 			TextView tv = (TextView) rootView.findViewById(R.id.tv_text);
-			EventDisplayObjects item = getItem(position);
+			DisplayObjects item = getItem(position);
 			tv.setText(item.mainText);
 			switch (item.type) {
-			case EventDisplayObjects.DATA_TYPE:
+			case DisplayObjects.DATA_TYPE:
 				tv.setTextColor(Color.DKGRAY);
 				rootView.setBackgroundColor(parent.getResources().getColor(
 						R.color.white_flat_cloud));
 				break;
-			case EventDisplayObjects.HEADER_TYPE:
+			case DisplayObjects.HEADER_TYPE:
 				tv.setTextColor(Color.WHITE);
 				rootView.setBackgroundColor(parent.getResources().getColor(
 						R.color.red_flat_pomegranate));
@@ -106,19 +109,20 @@ public class HomeListFragment extends Fragment {
 		}
 	}
 
-	class EventDisplayObjects {
+	class DisplayObjects {
 		private static final int HEADER_TYPE = 1;
 		private static final int DATA_TYPE = 2;
-		Group group;
+		Room group; // group
+		String user_id; // single
 		String mainText;
 		int type;
 
-		public EventDisplayObjects(String mainText, int typeOfObject) {
+		public DisplayObjects(String mainText, int typeOfObject) {
 			this.mainText = mainText;
 			this.type = typeOfObject;
 		}
 
-		public EventDisplayObjects(Group group) {
+		public DisplayObjects(Room group) {
 			this.group = group;
 			type = DATA_TYPE;
 			mainText = group.group_name;
@@ -138,6 +142,14 @@ public class HomeListFragment extends Fragment {
 		controller = GroupController.get(getActivity());
 		controller.set(this);
 		mAdapter = new EventListAdapter(getActivity());
+		rootView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				DisplayObjects dobj = mAdapter.list.get(position);
+				GroupActivity.startActivity(getActivity(), dobj.group.group_id);
+			}
+		});
 		rootView.setAdapter(mAdapter);
 		setHasOptionsMenu(true);
 		return rootView;

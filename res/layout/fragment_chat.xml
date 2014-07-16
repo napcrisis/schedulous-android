@@ -21,7 +21,7 @@
             android:hint="@string/chat_input_hint"
             android:inputType="textAutoCorrect" />
 
-        <TextView
+        <com.schedulous.chat.TextViewEx
             android:id="@+id/tv_send"
             android:layout_width="@dimen/send_btn_width"
             android:layout_height="match_parent"

@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.schedulous.contacts.ContactController;
 import com.schedulous.contacts.User;
-import com.schedulous.group.Group;
+import com.schedulous.group.Room;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.OnCompletionCall;
@@ -172,11 +172,11 @@ public class HttpService extends IntentService implements OnCompletionCall {
 					User.saveResponse(response, getApplicationContext());
 					break;
 				case CREATE_GROUP_REQUEST_CODE:
-					Group.queryServer(getApplicationContext());
+					Room.queryServer(getApplicationContext());
 					startCallBack(response, requestCode);
 					break;
 				case GROUP_LIST_REQUEST_CODE:
-					Group.saveResponse(response, getApplicationContext());
+					Room.saveResponse(response, getApplicationContext());
 				default:
 					startCallBack(response, requestCode);
 					break;

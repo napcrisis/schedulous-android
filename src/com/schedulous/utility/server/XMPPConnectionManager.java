@@ -38,8 +38,8 @@ public class XMPPConnectionManager {
 	public static final String TAG = XMPPConnectionManager.class
 			.getSimpleName();
 
-	public static final String XMPP_HOST = "test.schedulous.sg";
-	public static final String CONFERENCE_HOST_FOR_GROUP_CHAT = "@test.schedulous.sg";
+	public static final String XMPP_HOST = "go.schedulous.sg";
+	public static final String CONFERENCE_HOST_FOR_GROUP_CHAT = "@schedulous";
 
 	private static final int LOGIN = 0;
 	private static final int LOGOUT = 1;
@@ -50,6 +50,8 @@ public class XMPPConnectionManager {
 	public static final String TIMESTAMP = "timestamp";
 
 	public static final int RECONNECTING_IN_MILLIS = 1000 * 60 * 2;
+
+	private static final int PORT_NUMBER = 5222;
 
 	private Object lock = new Object();
 	private static XMPPConnection connection;
@@ -97,14 +99,6 @@ public class XMPPConnectionManager {
 		return instance;
 	}
 
-	public static XMPPConnectionManager testInstance(Context context,
-			String id, String pwd) {
-		if (instance == null) {
-			instance = new XMPPConnectionManager(context, id, pwd);
-		}
-		return instance;
-	}
-
 	private XMPPConnectionManager(Context context, String xmpp_userid,
 			String xmpp_password) {
 		this.mContext = context;
@@ -133,8 +127,11 @@ public class XMPPConnectionManager {
 	private void establish_connection() throws SmackException, IOException,
 			XMPPException {
 		if (connection == null || !connection.isConnected()) {
-			ConnectionConfiguration cc = new ConnectionConfiguration(XMPP_HOST);
-			connection = new XMPPTCPConnection(cc);
+			ConnectionConfiguration config = new ConnectionConfiguration(
+					XMPP_HOST, PORT_NUMBER);
+			config.setCompressionEnabled(true);
+			config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+			connection = new XMPPTCPConnection(config);
 			connection.connect();
 		}
 	}
@@ -299,9 +296,9 @@ public class XMPPConnectionManager {
 				} catch (NotConnectedException e) {
 					Log.wtf(TAG, "NotConnectedException" + e.getMessage());
 				} catch (NoResponseException e) {
-					Log.wtf(TAG, "NoResponseException" + e.getMessage());
+					Log.wtf(TAG, "NoResponseException " + e.getMessage());
 				} catch (SmackException e) {
-					Log.wtf(TAG, "SmackException" + e.getMessage());
+					Log.wtf(TAG, "SmackException " + e.getMessage());
 				} catch (IOException e) {
 					Log.wtf(TAG, "IOException" + e.getMessage());
 				}

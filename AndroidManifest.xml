@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.schedulous"
     android:versionCode="1"
@@ -34,7 +35,7 @@
             android:name="com.crashlytics.ApiKey"
             android:value="6a19632f8b533b3cf4317cd8a7c41b6862c6252d" />
 
-        <receiver android:name="com.schedulous.contacts.SmsListener" >
+        <receiver android:name="com.schedulous.utility.CallbackReceiver" >
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
@@ -64,6 +65,17 @@
         <activity
             android:name="com.schedulous.event.CreateEventActivity"
             android:screenOrientation="portrait" >
+        </activity>
+
+        <provider
+            android:name="com.schedulous.chat.ChatProvider"
+            android:authorities="com.schedulous.chat.ChatProvider"
+            android:exported="false"
+            android:multiprocess="true" />
+
+        <activity
+            android:name="com.schedulous.ChatBased"
+            android:label="@string/title_activity_chat_based" >
         </activity>
     </application>
 

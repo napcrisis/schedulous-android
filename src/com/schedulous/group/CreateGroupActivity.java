@@ -1,7 +1,6 @@
 package com.schedulous.group;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,13 +8,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.schedulous.ParentActivity;
 import com.schedulous.R;
 import com.schedulous.contacts.ContactController;
 import com.schedulous.contacts.User;
 import com.schedulous.contacts.UserListFragment;
 import com.schedulous.contacts.UserListUI;
 
-public class CreateGroupActivity extends Activity implements UserListUI {
+public class CreateGroupActivity extends ParentActivity implements UserListUI {
 	GroupController controller;
 	private UserListFragment user_list;
 	private EditText group_name;
@@ -86,7 +86,7 @@ public class CreateGroupActivity extends Activity implements UserListUI {
 	@Override
 	public void onIndividualRowClick(User user) {
 		if (user.userType == User.SCHEDULOUS_USER) {
-			GroupController.startChatActivity(this, user);
+			GroupActivity.startActivity(this, user.user_id);
 		} else {
 			ContactController.inviteUserToSchedulous(this, user);
 		}

@@ -1,7 +1,7 @@
 package com.schedulous.event;
 
-import android.app.Activity;
+import com.schedulous.ParentActivity;
 
-public class CreateEventActivity extends Activity {
+public class CreateEventActivity extends ParentActivity {
 
 }

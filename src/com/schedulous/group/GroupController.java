@@ -45,17 +45,12 @@ public class GroupController implements ReceiverCallback {
 
 	public void query(Context context) {
 		String lastCheckDateTime = HashTable
-				.get_entry(Group.KEY_LAST_QUERIED_TIMESTAMP_GROUP);
+				.get_entry(Room.KEY_LAST_QUERIED_TIMESTAMP_GROUP);
 		if (!TimeUtility.isTenMinutesLater(lastCheckDateTime)) {
 			return;
 		}
-		Group.queryServer(context);
+		Room.queryServer(context);
 		startReceiver(context);
-	}
-
-	public static void startChatActivity(Context context, User selected) {
-		Intent intent = new Intent(context, GroupActivity.class);
-		context.startActivity(intent);
 	}
 
 	public static void startCreateGroupActivity(Context context) {
@@ -111,7 +106,7 @@ public class GroupController implements ReceiverCallback {
 		// Gson gson = new Gson();
 		switch (data.getInt(HttpService.KEY_REQUEST_CODE)) {
 		case HttpService.CREATE_GROUP_REQUEST_CODE:
-			Group.clearLastUpdatedTiming();
+			Room.clearLastUpdatedTiming();
 			HomeActivity.startHomeActivity(context);
 			break;
 		case HttpService.GROUP_LIST_REQUEST_CODE:

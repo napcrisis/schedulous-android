@@ -36,7 +36,7 @@ public abstract class ParentActivity extends Activity{
 
 	@Override
 	protected void onStart() {
-		connectionManager = XMPPConnectionManager.getInstance(this);
+		connectionManager = XMPPConnectionManager.get(this);
 		doBindService();
 		super.onStart();
 	}

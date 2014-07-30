@@ -27,16 +27,16 @@ public class LoginController implements ReceiverCallback {
 	private static final int VERIFICATION_CODE_LENGTH = 5;
 	private Gson gson;
 	private Context context;
-	private CallbackReceiver receiver;
 	private RegistrationJson currentData;
 	private LoginUI callback;
+	private CallbackReceiver receiver;
 
 	public LoginController(Context context, LoginUI callback) {
 		this.context = context;
 		this.callback = callback;
 		MainDatabase.initMainDB(context);
 		gson = new Gson();
-
+		receiver = new CallbackReceiver(context, this);
 	}
 
 	public void send_number(String mobile_number) throws Exception {
@@ -46,9 +46,6 @@ public class LoginController implements ReceiverCallback {
 		String json = gson.toJson(currentData);
 		HttpService.startService(context, REGISTRATION_URL, json,
 				HttpService.REGISTRATION_REQUEST_CODE);
-
-		receiver = new CallbackReceiver(this);
-		context.registerReceiver(receiver, receiver.intentFilter);
 	}
 
 	public void verify_number(String authentication_code) {
@@ -61,11 +58,6 @@ public class LoginController implements ReceiverCallback {
 			String json = gson.toJson(currentData);
 			HttpService.startService(context, VERIFY_URL, json,
 					HttpService.VERIFICATION_REQUEST_CODE);
-
-			if (receiver == null) {
-				receiver = new CallbackReceiver(this);
-				context.registerReceiver(receiver, receiver.intentFilter);
-			}
 		} catch (Exception ex) {
 			if (context != null) {
 				Toast.makeText(context, ex.getMessage(), Toast.LENGTH_LONG)
@@ -76,15 +68,11 @@ public class LoginController implements ReceiverCallback {
 	}
 
 	public void onPause() {
-		if (receiver != null && context != null) {
-			context.unregisterReceiver(receiver);
-		}
+		receiver.unregister();
 	}
 
 	public void onResume() {
-		if (receiver != null && context != null) {
-			context.registerReceiver(receiver, receiver.intentFilter);
-		}
+		receiver.register();
 	}
 
 	public boolean onCreateAuthCheck() {

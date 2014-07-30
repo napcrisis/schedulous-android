@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SchedulousAndroid</string>
+    <string name="app_name">Schedulous</string>
 
     <!-- Onboard -->
-    <string name="register">Register</string>
+    <string name="getstarted">Get Started</string>
+    <string name="next">Next</string>
     <string name="send">send</string>
-    <string name="verify">verify</string>
+    <string name="start">start</string>
     <string name="mobile_hint">Mobile Number</string>
     <string name="verification_code">5 digit code from SMS</string>
     <string name="mobile_default_country_code">+65</string>
     <!-- chat room -->
+    <string name="search">Search</string>
+    <string name="search_hint">Who would you like to message?</string>
     <string name="group_name">Group Name</string>
-    <string name="single_chat">send a message</string>
+    <string name="add_group_photo">Add Group Photo</string>
+    <string name="single_chat">New Message</string>
     <string name="single">one to one chat</string>
     <string name="create">create</string>
     <string name="group">group</string>
     <string name="chat_input_hint">Send a message</string>
-    <!-- Event list -->
-    <string name="new_group">new group</string>
+    <string name="new_group">New Group</string>
     <!-- Common -->
     <string name="sample">sample text</string>
     <string name="sample_time">00:00</string>

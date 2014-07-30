@@ -2,18 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/item_group_toggle"
-        android:showAsAction="always"
-        android:title="@string/group"/>
-    <item
         android:id="@+id/item_group_create"
+        android:orderInCategory="999"
         android:showAsAction="always"
-        android:title="@string/create"
-        android:visible="false"/>
-    <item
-        android:id="@+id/item_if_group_mode"
-        android:title="@string/single"
-        android:checkable="true"
+        android:title="@string/next"
         android:visible="false"/>
 
 </menu>

@@ -7,7 +7,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 public class Common {
-	public static final String SCHEDULOUS_URL = "http://go.schedulous.sg";
+	public static final String SCHEDULOUS_URL = "http://test.schedulous.sg";
 	public static final String ILLEGAL_ACTIVITY_STARTER = "Please call this activity using the static method helper";
 	public static final String SUCCESS = "success";
 

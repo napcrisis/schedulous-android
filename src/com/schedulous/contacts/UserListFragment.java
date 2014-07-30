@@ -5,9 +5,12 @@ import java.util.Collections;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -19,6 +22,8 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
@@ -27,8 +32,9 @@ import com.schedulous.R;
 import com.schedulous.contacts.UserListFragment.UserAdapter.ViewHolder;
 import com.schedulous.utility.Common;
 
-public class UserListFragment extends Fragment {
+public class UserListFragment extends Fragment implements OnQueryTextListener {
 	private static final String TAG = UserListFragment.class.getSimpleName();
+
 	OnItemClickListener row_click_listener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> adapter, View rowView,
@@ -52,8 +58,8 @@ public class UserListFragment extends Fragment {
 		private ImageLoader mImageLoader;
 		private ArrayList<User> unregisteredUsers;
 		private ArrayList<User> registeredUsers;
-		private User headerForRegistered;
-		private User headerForUnregistered;
+		Typeface deliciousroman;
+		Typeface deliciousbold;
 
 		public UserAdapter(Context context) {
 			super();
@@ -65,12 +71,21 @@ public class UserListFragment extends Fragment {
 			registeredUsers = User.getAllFriends();
 			User.removeFriendsFromContacts(contacts);
 			unregisteredUsers = contacts;
-			headerForRegistered = new User(User.SECTION_TYPE,
-					"Schedulous Users");
-			headerForUnregistered = new User(User.SECTION_TYPE,
-					"Phonebook Users");
-
 			filter(searchText);
+			deliciousroman = Typeface.createFromAsset(
+					getActivity().getAssets(), "fonts/Delicious-Roman.otf");
+
+			deliciousbold = Typeface.createFromAsset(getActivity().getAssets(),
+					"fonts/Delicious-Bold.otf");
+		}
+
+		void clearSelection() {
+			for (User user : unregisteredUsers) {
+				user.isSelected = false;
+			}
+			for (User user : registeredUsers) {
+				user.isSelected = false;
+			}
 		}
 
 		ArrayList<User> getSelectedUsers() {
@@ -87,29 +102,41 @@ public class UserListFragment extends Fragment {
 		}
 
 		void filter(String searchString) {
-			ArrayList<User> filteredRegisteredUsers = new ArrayList<User>();
-			ArrayList<User> filteredUnregisteredUsers = new ArrayList<User>();
+			ArrayList<User> filtered = new ArrayList<User>();
 			for (User user : registeredUsers) {
 				if (!Common.isNullOrEmpty(user.name)
 						&& user.name.contains(searchString)) {
-					filteredRegisteredUsers.add(user);
+					filtered.add(user);
 				}
 			}
 			for (User user : unregisteredUsers) {
 				if (!Common.isNullOrEmpty(user.name)
 						&& user.name.contains(searchString)) {
-					filteredUnregisteredUsers.add(user);
+					filtered.add(user);
 				}
 			}
-			if (filteredRegisteredUsers.size() != 0) {
-				filteredRegisteredUsers.add(0, headerForRegistered);
-			}
-			if (filteredUnregisteredUsers.size() != 0) {
-				filteredUnregisteredUsers.add(0, headerForUnregistered);
-			}
+			Collections.sort(filtered);
 			displayData.clear();
-			displayData.addAll(filteredRegisteredUsers);
-			displayData.addAll(filteredUnregisteredUsers);
+			char current = 'Z';
+			for (User u : filtered) {
+				if (Common.isNullOrEmpty(searchString)) {
+					if (u.name != null) {
+						if (current != Character.toUpperCase(u.name.charAt(0))) {
+							current = Character.toUpperCase(u.name.charAt(0));
+							if (current == '+') {
+								displayData.add(new User(User.SECTION_TYPE,
+										"Unnamed"));
+							} else {
+								displayData.add(new User(User.SECTION_TYPE,
+										current + ""));
+							}
+						}
+					} else {
+						displayData.add(new User(User.SECTION_TYPE, "Unnamed"));
+					}
+				}
+				displayData.add(u);
+			}
 			notifyDataSetChanged();
 		}
 
@@ -150,10 +177,10 @@ public class UserListFragment extends Fragment {
 			ViewHolder holder;
 			if (currentUser.rowType == User.SECTION_TYPE || recycled == null) {
 				RelativeLayout row = (RelativeLayout) mInflater.inflate(
-						R.layout.row_user, null);
+						R.layout.row_user, parent, false);
 				TextView text = (TextView) row.findViewById(R.id.tv_text);
 				CheckBox check = (CheckBox) row
-						.findViewById(R.id.cb_check_list);
+						.findViewById(R.id.iv_check_circle);
 				ImageView profile_picture = (ImageView) row
 						.findViewById(R.id.iv_profile_picture);
 				holder = new ViewHolder(text, check, profile_picture, row);
@@ -165,8 +192,16 @@ public class UserListFragment extends Fragment {
 					.setVisibility(currentUser.rowType == User.SECTION_TYPE ? View.GONE
 							: View.VISIBLE);
 			holder.parent
-					.setBackgroundResource(currentUser.rowType == User.SECTION_TYPE ? R.color.red_flat_alizarin
-							: R.color.white_flat_cloud);
+					.setBackgroundResource(currentUser.rowType == User.SECTION_TYPE ? R.drawable.bg_white_with_bottom_line
+							: R.color.white);
+			holder.text
+					.setTypeface(currentUser.rowType == User.SECTION_TYPE ? deliciousbold
+							: deliciousroman);
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.text
+					.getLayoutParams();
+			params.topMargin = currentUser.rowType == User.SECTION_TYPE ? 20
+					: 0;
+			holder.text.setLayoutParams(params);
 			// set data
 			holder.text
 					.setText(Common.isNullOrEmpty(currentUser.name) ? currentUser.international_number
@@ -253,8 +288,48 @@ public class UserListFragment extends Fragment {
 				R.layout.fragment_pinned_listview, container, false);
 		rootView.setOnItemClickListener(row_click_listener);
 		mAdapter = new UserAdapter(getActivity());
+		rootView.setDividerHeight(0);
+		rootView.setDivider(null);
 		rootView.setAdapter(mAdapter);
 
+		setHasOptionsMenu(true);
 		return rootView;
+	}
+
+	public void showOnly(ArrayList<User> displayable) {
+		mAdapter.displayData.clear();
+		for (User u : displayable) {
+			mAdapter.displayData.add(u);
+			mAdapter.notifyDataSetChanged();
+		}
+	}
+
+	public void clear() {
+		mAdapter.clearSelection();
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.userlist_search, menu);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+				.getActionView();
+		searchView.setOnQueryTextListener(this);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	public void filter(String searchedText) {
+		mAdapter.filter(searchedText);
+	}
+
+	@Override
+	public boolean onQueryTextChange(String searchText) {
+		mAdapter.filter(searchText);
+		return false;
+	}
+
+	@Override
+	public boolean onQueryTextSubmit(String arg0) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

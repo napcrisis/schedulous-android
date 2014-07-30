@@ -19,8 +19,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
-import com.schedulous.group.Room;
-import com.schedulous.group.GroupActivity;
+import com.schedulous.chat.ChatTable;
+import com.schedulous.contacts.User;
+import com.schedulous.group.ChatActivity;
+import com.schedulous.group.Group;
 import com.schedulous.group.GroupController;
 
 public class HomeListFragment extends Fragment {
@@ -42,12 +44,17 @@ public class HomeListFragment extends Fragment {
 
 		public void refresh() {
 			list.clear();
-			ArrayList<Room> groups = Room.getAll();
+			ArrayList<Group> groups = Group.getAll();
+			ArrayList<String> ids = ChatTable.getIndividualMessagedUsers();
 			if (groups.size() > 0) {
 				list.add(new DisplayObjects("Chat", DisplayObjects.HEADER_TYPE));
-				for (Room g : groups) {
+				for (Group g : groups) {
 					list.add(new DisplayObjects(g));
 				}
+			}
+
+			for (String id : ids) {
+				list.add(new DisplayObjects(User.get(id)));
 			}
 			if (firstLoad) {
 				firstLoad = false;
@@ -112,8 +119,8 @@ public class HomeListFragment extends Fragment {
 	class DisplayObjects {
 		private static final int HEADER_TYPE = 1;
 		private static final int DATA_TYPE = 2;
-		Room group; // group
-		String user_id; // single
+		Group group; // group
+		User user; // single
 		String mainText;
 		int type;
 
@@ -122,10 +129,16 @@ public class HomeListFragment extends Fragment {
 			this.type = typeOfObject;
 		}
 
-		public DisplayObjects(Room group) {
+		public DisplayObjects(Group group) {
 			this.group = group;
 			type = DATA_TYPE;
 			mainText = group.group_name;
+		}
+
+		public DisplayObjects(User user) {
+			this.user = user;
+			type = DATA_TYPE;
+			mainText = user.name;
 		}
 
 		@Override
@@ -147,7 +160,10 @@ public class HomeListFragment extends Fragment {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				DisplayObjects dobj = mAdapter.list.get(position);
-				GroupActivity.startActivity(getActivity(), dobj.group.group_id);
+
+				ChatActivity.startActivity(getActivity(),
+						dobj.user == null ? dobj.group.group_id
+								: dobj.user.user_id, dobj.user == null);
 			}
 		});
 		rootView.setAdapter(mAdapter);

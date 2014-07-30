@@ -1,16 +1,16 @@
 package com.schedulous.group;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.schedulous.ParentActivity;
 import com.schedulous.R;
 import com.schedulous.chat.ChatController;
 import com.schedulous.chat.ChatFragment;
 
-public class GroupActivity extends Activity {
+public class ChatActivity extends ParentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +23,10 @@ public class GroupActivity extends Activity {
 		}
 	}
 
-	public static void startActivity(Context context, String room_id) {
-		Intent intent = new Intent(context, GroupActivity.class);
-		ChatController.getInstance().changeRoom(room_id);
+	public static void startActivity(Context context, String id,
+			boolean multiUserRoom) {
+		Intent intent = new Intent(context, ChatActivity.class);
+		ChatController.get(context).changeRoom(context, id, multiUserRoom);
 		context.startActivity(intent);
 	}
 }

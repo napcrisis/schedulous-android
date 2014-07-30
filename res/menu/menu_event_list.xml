@@ -3,8 +3,8 @@
 
     <item
         android:id="@+id/item_create_group"
+        android:icon="@drawable/ic_new_chat"
         android:showAsAction="always"
-        android:icon="@drawable/ic_chat"
         android:title="@string/new_group"
         android:visible="true"/>
 

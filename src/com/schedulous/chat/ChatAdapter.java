@@ -23,6 +23,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.schedulous.R;
 import com.schedulous.contacts.User;
 import com.schedulous.utility.AuthenticationManager;
+import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.TimeUtility;
 
@@ -41,6 +42,8 @@ public class ChatAdapter extends CursorAdapter {
 	private boolean allowScrollDown = true;
 	private static final int DELAY_BEFORE_NEXTSCROLLDOWN = 2000;
 
+	private CallbackReceiver receiver;
+
 	public ChatAdapter(Context context) {
 		super(context, null, 0);
 		currentUserId = AuthenticationManager.getAuth().user.user_id + "";
@@ -56,7 +59,6 @@ public class ChatAdapter extends CursorAdapter {
 		this.room = room;
 		users.clear();
 		// TODO: reload data
-
 	}
 
 	private class ViewHolder {
@@ -68,7 +70,7 @@ public class ChatAdapter extends CursorAdapter {
 	}
 
 	public void scrollDown() {
-		if(mListview == null){
+		if (mListview == null) {
 			Log.wtf(TAG, "mListView Not attached");
 			return;
 		}
@@ -86,7 +88,7 @@ public class ChatAdapter extends CursorAdapter {
 	public void bindView(View view, Context context, Cursor cursor) {
 		ViewHolder holder = (ViewHolder) view.getTag();
 		holder.mOtherUsersDP.setImageDrawable(default_dp);
-		Chat currentChat = new Chat(cursor);
+		Msg currentChat = new Msg(cursor);
 		String message = currentChat.message;
 
 		holder.mMessageTextView.setText(message);
@@ -107,8 +109,10 @@ public class ChatAdapter extends CursorAdapter {
 			holder.mOtherUsersDP.setVisibility(View.GONE);
 			holder.mMessageTextView.setGravity(Gravity.RIGHT);
 			holder.mMessageHolder
-					.setBackgroundResource(R.drawable.ic_chat_bubble_white);
+					.setBackgroundResource(R.drawable.ic_self_chat);
 		} else {
+			holder.mMessageHolder
+					.setBackgroundResource(R.drawable.ic_friend_chat);
 			holder.mMessageTextView.setGravity(Gravity.LEFT);
 			String name = chatUser.name;
 			if (name != null && !"".equals(name)) {
@@ -177,5 +181,4 @@ public class ChatAdapter extends CursorAdapter {
 			}
 		});
 	}
-
 }

@@ -13,7 +13,7 @@ public class XMPPService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.v("XMPPService", "onBind()");
-		XMPPConnectionManager.getInstance(this);
+		XMPPConnectionManager.get(this);
 		return new LocalBinder<XMPPService>(this);
 	}
 
@@ -34,7 +34,7 @@ public class XMPPService extends Service {
 	public void onDestroy() {
 		Log.v("XMPPService", "onDestroy");
 		try {
-			XMPPConnectionManager.getInstance(getApplicationContext()).logout();
+			XMPPConnectionManager.get(getApplicationContext()).logout();
 		} catch (IllegalStateException e) {
 
 		}

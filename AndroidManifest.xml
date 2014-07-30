@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.schedulous"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.1" >
 
     <uses-sdk
-        android:minSdkVersion="11"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="13"
+        android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -43,7 +43,10 @@
 
         <activity
             android:name="com.schedulous.onboarding.LoginActivity"
-            android:screenOrientation="portrait" >
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -55,11 +58,19 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.schedulous.group.CreateGroupActivity"
+            android:name="com.schedulous.chat.CreateChatActivity"
+            android:noHistory="true"
             android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="com.schedulous.group.GroupActivity"
+            android:name="com.schedulous.group.ChatActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity

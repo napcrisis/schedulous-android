@@ -14,26 +14,33 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.schedulous.R;
+import com.schedulous.chat.ChatController.ChatDisplayObjects;
+import com.schedulous.utility.Callback;
+import com.schedulous.utility.CallbackReceiver;
+import com.schedulous.utility.Common;
 
 public class ChatFragment extends Fragment implements
-		LoaderManager.LoaderCallbacks<Cursor> {
+		LoaderManager.LoaderCallbacks<Cursor>, Callback {
 	private EditText mInputBox;
 	private TextView mSend;
 	private ListView mListViewHistory;
-
+	private CallbackReceiver receiver;
 	private ChatAdapter mAdapter;
 
 	private static final int LOADER_ID = 0;
+	private ChatDisplayObjects cdo;
 
 	private OnClickListener send_message_listener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			Toast.makeText(getActivity(), mInputBox.getText().toString(),
-					Toast.LENGTH_LONG).show();
+			if (!Common.isNullOrEmpty(mInputBox.getText().toString())) {
+				ChatController.get(getActivity()).sendMessage(
+						mInputBox.getText().toString());
+				mInputBox.setText(R.string.empty);
+			}
 		}
 	};
 
@@ -44,7 +51,7 @@ public class ChatFragment extends Fragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-
+		receiver = new CallbackReceiver(getActivity(), this);
 		RelativeLayout rootView = (RelativeLayout) inflater.inflate(
 				R.layout.fragment_chat, container, false);
 
@@ -68,8 +75,16 @@ public class ChatFragment extends Fragment implements
 
 	@Override
 	public void onPause() {
-		ChatController.getInstance().onPause();
+		receiver.unregister();
 		super.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		receiver.register();
+		cdo = ChatController.get(getActivity()).getDisplayObject();
+		getActivity().getActionBar().setTitle(cdo.title);
+		super.onResume();
 	}
 
 	public void changeChatBubbleToSelf(boolean messageSenderIsSelf) {
@@ -90,14 +105,10 @@ public class ChatFragment extends Fragment implements
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// Create a new CursorLoader with the following query parameters.
-		return new CursorLoader(
-				getActivity(),
-				ChatProvider.CONTENT_URI,
-				ChatTable.ALL_COLUMNS,
-				ChatTable.ALL_COLUMNS[ChatTable.ROOM_ID]
-						+ "="
-						+ ChatController.getInstance().getCurrentRoom().group_id,
-				null, null);
+		return new CursorLoader(getActivity(), ChatProvider.CONTENT_URI,
+				ChatTable.ALL_COLUMNS, ChatTable.ALL_COLUMNS[ChatTable.ROOM_ID]
+						+ "='" + ChatController.get(getActivity()).getChatID()
+						+ "'", null, null);
 	}
 
 	@Override
@@ -118,4 +129,14 @@ public class ChatFragment extends Fragment implements
 		mAdapter.swapCursor(null);
 	}
 
+	@Override
+	public void doAction(Bundle data, String action) {
+		refresh();
+	}
+
+	public void refresh() {
+		if (getActivity() != null) {
+			getLoaderManager().restartLoader(LOADER_ID, null, this);
+		}
+	}
 }

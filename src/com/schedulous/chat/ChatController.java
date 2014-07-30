@@ -1,36 +1,73 @@
 package com.schedulous.chat;
 
-import com.schedulous.group.Room;
+import android.content.Context;
+
+import com.schedulous.contacts.User;
+import com.schedulous.group.Group;
+import com.schedulous.utility.AuthenticationManager;
+import com.schedulous.utility.CallbackReceiver;
+import com.schedulous.utility.server.XMPPConnectionManager;
 
 public class ChatController {
 
 	public static ChatController instance;
 
-	private Room room;
+	private Group group;
+	private User user;
+	private Context mContext;
 
-	private ChatController() {
+	public static final String INDIVIDUAL_PREFIX = "I";
+
+	private ChatController(Context context) {
 		super();
+		mContext = context;
 	}
 
-	public static ChatController getInstance() {
+	public static ChatController get(Context context) {
 		if (instance == null) {
-			instance = new ChatController();
+			instance = new ChatController(context);
 		}
 		return instance;
 	}
 
-	public void changeRoom(String room_id) {
-		if (room != null) {
-			// cleanup previous ops
+	public String getChatID() {
+		return user != null ? INDIVIDUAL_PREFIX + user.user_id : group.group_id;
+	}
+
+	public void changeRoom(Context context, String id, boolean multiUserRoom) {
+		user = multiUserRoom ? null : User.get(id);
+		group = multiUserRoom ? Group.get(id) : null;
+		if (user == null) {
+			XMPPConnectionManager.get(context).joinRoom(id);
+		} else {
+			XMPPConnectionManager.get(context).startPrivateChat(id);
 		}
-		room = Room.get(room_id);
 	}
 
-	public void onPause() {
-		ChatTable.readAll(room.group_id);
+	public ChatDisplayObjects getDisplayObject() {
+		ChatDisplayObjects cdo = new ChatDisplayObjects();
+		cdo.display_picture = user != null ? user.profile_pic
+				: group.group_pic_url;
+		cdo.title = user != null ? user.name : group.group_name;
+		return cdo;
 	}
 
-	public Room getCurrentRoom() {
-		return room;
+	public class ChatDisplayObjects {
+		String title;
+		String display_picture;
+	}
+
+	public void sendMessage(String msg) {
+		if (user == null) {
+			XMPPConnectionManager.get(mContext).sendMessage(getChatID(), msg);
+
+		} else {
+			XMPPConnectionManager.get(mContext).message(user.user_id, msg);
+		}
+		Msg chat = new Msg(msg, AuthenticationManager.getAuth().user.user_id
+				+ "", getChatID(), Msg.SELF);
+
+		ChatTable.insertSingleChat(chat);
+		CallbackReceiver.notify(mContext);
 	}
 }

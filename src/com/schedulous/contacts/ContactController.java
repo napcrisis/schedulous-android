@@ -1,8 +1,8 @@
 package com.schedulous.contacts;
 
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -271,55 +270,22 @@ public class ContactController {
 			ContentResolver contentResolver) {
 		if (pictureUri == null)
 			return null;
-		// Creates an asset file descriptor for the thumbnail file.
-		AssetFileDescriptor afd = null;
-		// try-catch block for file not found
+		InputStream is = null;
 		try {
-			// Creates a holder for the URI.
-			// Sets the URI from the incoming PHOTO_THUMBNAIL_URI
 			Uri thumbUri = Uri.parse(pictureUri);
-			if (thumbUri == null)
-				return null;
+			is = contentResolver.openInputStream(thumbUri);
 
-			/*
-			 * Retrieves an AssetFileDescriptor object for the thumbnail URI
-			 * using ContentResolver.openAssetFileDescriptor
-			 */
-			afd = contentResolver.openAssetFileDescriptor(thumbUri, "r");
-
-			if (afd == null)
-				return null;
-
-			/*
-			 * Gets a file descriptor from the asset file descriptor. This
-			 * object can be used across processes.
-			 */
-			FileDescriptor fileDescriptor = afd.getFileDescriptor();
-			// Decode the photo file and return the result as a Bitmap
-			// If the file descriptor is valid
-			if (fileDescriptor != null) {
-				// Decodes the bitmap
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				// options.inSampleSize = 2;
-				options.inPreferredConfig = Bitmap.Config.RGB_565;
-				options.inPurgeable = true;
-				options.inInputShareable = true;
-				return BitmapFactory.decodeFileDescriptor(fileDescriptor, null,
-						options);
+			if (is != null) {
+				return BitmapFactory.decodeStream(is);
 			}
-			// If the file isn't found
 		} catch (FileNotFoundException e) {
-			/*
-			 * Handle file not found errors
-			 */
-			// In all cases, close the asset file descriptor
-		} catch (Exception e) {
-			Crashlytics.logException(e);
+			e.printStackTrace();
 		} finally {
-			if (afd != null) {
+			if (is != null) {
 				try {
-					afd.close();
+					is.close();
 				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}

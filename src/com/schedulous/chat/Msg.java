@@ -12,7 +12,7 @@ import org.jivesoftware.smackx.delay.packet.DelayInformation;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-public class Chat {
+public class Msg {
 	public static final boolean SELF = true;
 	public static final boolean OTHERS = false;
 
@@ -36,7 +36,7 @@ public class Chat {
 	public static final int SHOW_DP = 1;
 	public static final int HIDE_DP = 2;
 
-	public Chat(String message, String username, String room,
+	public Msg(String message, String username, String room,
 			boolean isCurrentUser) {
 		this.message = message;
 		this.username = username;
@@ -45,7 +45,7 @@ public class Chat {
 		this.isCurrentUser = isCurrentUser;
 	}
 
-	public Chat(Cursor cursor) {
+	public Msg(Cursor cursor) {
 		sqlite_id = cursor.getInt(ChatTable.UNUSED_ID);
 		message = cursor.getString(ChatTable.MESSAGE);
 		username = cursor.getString(ChatTable.FROM);
@@ -54,7 +54,7 @@ public class Chat {
 		status = cursor.getInt(ChatTable.SENT_TO_SERVER);
 		show_dp = cursor.getInt(ChatTable.DISPLAY_PHOTO);
 	}
-	public Chat(Packet packet, String currentUser) {
+	public Msg(Packet packet, String currentUser) {
 		DelayInformation delay = (DelayInformation) packet.getExtension("x",
 				"jabber:x:delay");
 		if (packet instanceof Message) {
@@ -78,7 +78,7 @@ public class Chat {
 		}
 	}
 
-	public Chat(Message message, String currentUser) {
+	public Msg(Message message, String currentUser) {
 		DelayInformation delay = (DelayInformation) message.getExtension("x",
 				"jabber:x:delay");
 		long messageTime = 0;
@@ -110,8 +110,8 @@ public class Chat {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Chat) {
-			Chat chat = (Chat) o;
+		if (o instanceof Msg) {
+			Msg chat = (Msg) o;
 			return chat.isCurrentUser == isCurrentUser
 					&& chat.message.equals(message);
 		}

@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.SmackException;
@@ -13,6 +16,7 @@ import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
@@ -21,13 +25,13 @@ import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.xdata.Form;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.schedulous.chat.Chat;
+import com.schedulous.chat.ChatController;
+import com.schedulous.chat.Msg;
 import com.schedulous.chat.ChatTable;
 import com.schedulous.utility.AuthenticationManager;
 import com.schedulous.utility.AuthenticationManager.Authentication;
@@ -39,19 +43,22 @@ public class XMPPConnectionManager {
 			.getSimpleName();
 
 	public static final String XMPP_HOST = "go.schedulous.sg";
-	public static final String CONFERENCE_HOST_FOR_GROUP_CHAT = "@schedulous";
+	public static final String SINGLE_USER_EXTENSION = "@schedulous";
+	public static final String CONFERENCE_HOST_FOR_GROUP_CHAT = "@test.schedulous";
+
+	private static final int PORT_NUMBER = 5222;
 
 	private static final int LOGIN = 0;
 	private static final int LOGOUT = 1;
 	private static final int SEND_MESSAGE = 2;
 	private static final int LEAVE_ROOM = 3;
 	private static final int JOIN_SINGLE_ROOM = 4;
+	private static final int SEND_INDIVIDUAL_MSG = 5;
+	private static final int LISTEN_TO = 6;
 
 	public static final String TIMESTAMP = "timestamp";
 
 	public static final int RECONNECTING_IN_MILLIS = 1000 * 60 * 2;
-
-	private static final int PORT_NUMBER = 5222;
 
 	private Object lock = new Object();
 	private static XMPPConnection connection;
@@ -86,7 +93,7 @@ public class XMPPConnectionManager {
 
 	private static XMPPConnectionManager instance;
 
-	public static XMPPConnectionManager getInstance(Context context) {
+	public static XMPPConnectionManager get(Context context) {
 		if (instance == null) {
 			Authentication auth = AuthenticationManager.getAuth();
 			if (auth == null) {
@@ -97,6 +104,41 @@ public class XMPPConnectionManager {
 					auth.user.xmpp);
 		}
 		return instance;
+	}
+
+	private HashMap<String, Chat> singles;
+
+	public void startPrivateChat(String user_id) {
+		new ATask().execute(LISTEN_TO + "", user_id);
+	}
+
+	private void listenTo(String user_id) {
+		if (singles == null) {
+			singles = new HashMap<String, Chat>();
+		}
+		if (!singles.containsKey(user_id)) {
+			ChatManager chatmanager = ChatManager.getInstanceFor(connection);
+			Chat chat = chatmanager.createChat(user_id + SINGLE_USER_EXTENSION,
+					new MessageListener() {
+						public void processMessage(Chat chat, Message message) {
+							Msg m = new Msg(message, xmpp_userid);
+							m.room = ChatController.INDIVIDUAL_PREFIX + m.room;
+							ChatTable.insertSingleChat(m);
+							CallbackReceiver.notify(mContext);
+						}
+					});
+			singles.put(user_id, chat);
+		}
+	}
+
+	public void message(String user_id, String message) {
+		new ATask().execute(SEND_INDIVIDUAL_MSG + "", user_id, message);
+	}
+
+	private void send_private_message(String user_id, String message)
+			throws NotConnectedException, XMPPException {
+		listenTo(user_id);
+		singles.get(user_id).sendMessage(message);
 	}
 
 	private XMPPConnectionManager(Context context, String xmpp_userid,
@@ -181,7 +223,7 @@ public class XMPPConnectionManager {
 					String pid = packet.getPacketID();
 					if (pid == null)
 						return;
-					Chat chat = new Chat(packet, xmpp_userid);
+					Msg chat = new Msg(packet, xmpp_userid);
 					long msgDateTime = Long.parseLong(chat.dateTime);
 					String dbLastUpdated = HashTable.get_entry(TIMESTAMP + "|"
 							+ chat.room);
@@ -197,19 +239,15 @@ public class XMPPConnectionManager {
 					}
 					if (!"0".equals(chat.dateTime)
 							&& Long.parseLong(chat.dateTime) < filter) {
-						// TODO: snowtrail
 						return;
 					}
 					Authentication auth = AuthenticationManager.getAuth();
-					chat.setStatus(Chat.STATUS_CODE_RECEIVED);
+					chat.setStatus(Msg.STATUS_CODE_RECEIVED);
 					if (!chat.getId().equals("" + auth.user.user_id)) {
 						ChatTable.insertSingleChat(chat);
-						Intent broadcastIntent = new Intent();
-						broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-						broadcastIntent
-								.setAction(CallbackReceiver.RECEIVER_CODE);
-						mContext.sendBroadcast(broadcastIntent);
+						CallbackReceiver.notify(mContext);
 					}
+
 				}
 			};
 			rooms.get(room).muc.addMessageListener(rooms.get(room).pl);
@@ -217,21 +255,26 @@ public class XMPPConnectionManager {
 	}
 
 	private MultiUserChat createRoomJustIncase(final String room)
-			throws XMPPErrorException, SmackException {
+			throws XMPPErrorException {
 		MultiUserChat muc = null;
-		muc = new MultiUserChat(connection, room
-				+ CONFERENCE_HOST_FOR_GROUP_CHAT);
-		muc.create(xmpp_userid);
-		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		if (connection != null) {
-			if (!connection.isConnected()) {
-				Crashlytics.log("connection state has failed id:" + xmpp_userid
-						+ "\n password:" + xmpp_password + " room" + room);
+		try {
+			muc = new MultiUserChat(connection, room
+					+ CONFERENCE_HOST_FOR_GROUP_CHAT);
+			muc.create(xmpp_userid);
+			muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+			if (connection != null) {
+				if (!connection.isConnected()) {
+					Crashlytics.log("connection state has failed id:"
+							+ xmpp_userid + "\n password:" + xmpp_password
+							+ " room" + room);
+				}
+				if (!connection.isAuthenticated()) {
+					Crashlytics.log("xmpp not authenticated id:" + xmpp_userid
+							+ "\n password:" + xmpp_password + " room" + room);
+				}
 			}
-			if (!connection.isAuthenticated()) {
-				Crashlytics.log("xmpp not authenticated id:" + xmpp_userid
-						+ "\n password:" + xmpp_password + " room" + room);
-			}
+		} catch (SmackException se) {
+			// room is known to fail if already existing
 		}
 		return muc;
 	}
@@ -290,6 +333,14 @@ public class XMPPConnectionManager {
 						Log.v(TAG, "Leaving Room");
 						leaveAllRooms();
 						break;
+					case SEND_INDIVIDUAL_MSG:
+						String person = params[1];
+						String msg = params[2];
+						Log.v(TAG, "Sending message to person: " + person);
+						send_private_message(person, msg);
+						break;
+					case LISTEN_TO:
+						listenTo(params[1]);
 					}
 				} catch (XMPPException e) {
 					Log.wtf(TAG, "XMPPException" + e.getMessage());

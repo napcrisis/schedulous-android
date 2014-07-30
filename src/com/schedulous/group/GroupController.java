@@ -9,6 +9,7 @@ import android.os.Bundle;
 import com.google.gson.Gson;
 import com.schedulous.HomeActivity;
 import com.schedulous.HomeListFragment;
+import com.schedulous.chat.CreateChatActivity;
 import com.schedulous.contacts.User;
 import com.schedulous.utility.AuthenticationManager;
 import com.schedulous.utility.AuthenticationManager.Authentication;
@@ -22,12 +23,11 @@ import com.schedulous.utility.server.HttpService;
 public class GroupController implements ReceiverCallback {
 	private static final String URL_CREATE = Common.SCHEDULOUS_URL
 			+ "/group/create";
-	
-	private CallbackReceiver receiver;
 	public Context context;
 
 	private HomeListFragment homeListFragment;
 	private static GroupController single;
+	private CallbackReceiver receiver;
 
 	public static GroupController get(Context context) {
 		if (single == null) {
@@ -41,20 +41,20 @@ public class GroupController implements ReceiverCallback {
 	private GroupController(Context context) {
 		super();
 		this.context = context;
+		receiver = new CallbackReceiver(context, this);
 	}
 
 	public void query(Context context) {
 		String lastCheckDateTime = HashTable
-				.get_entry(Room.KEY_LAST_QUERIED_TIMESTAMP_GROUP);
+				.get_entry(Group.KEY_LAST_QUERIED_TIMESTAMP_GROUP);
 		if (!TimeUtility.isTenMinutesLater(lastCheckDateTime)) {
 			return;
 		}
-		Room.queryServer(context);
-		startReceiver(context);
+		Group.queryServer(context);
 	}
 
 	public static void startCreateGroupActivity(Context context) {
-		Intent intent = new Intent(context, CreateGroupActivity.class);
+		Intent intent = new Intent(context, CreateChatActivity.class);
 		context.startActivity(intent);
 	}
 
@@ -77,14 +77,6 @@ public class GroupController implements ReceiverCallback {
 		Gson gson = new Gson();
 		HttpService.startService(context, URL_CREATE, gson.toJson(data),
 				HttpService.CREATE_GROUP_REQUEST_CODE);
-		startReceiver(context);
-	}
-
-	private void startReceiver(Context context) {
-		if (receiver == null) {
-			receiver = new CallbackReceiver(this);
-			context.registerReceiver(receiver, receiver.intentFilter);
-		}
 	}
 
 	static class CreateGroupData {
@@ -92,6 +84,7 @@ public class GroupController implements ReceiverCallback {
 		ArrayList<String> registered;
 		ArrayList<String> unregistered;
 		Authentication auth;
+
 		public CreateGroupData(String user_id, String group_name) {
 			auth = AuthenticationManager.getAuthServerToken();
 			this.group_name = group_name;
@@ -101,16 +94,16 @@ public class GroupController implements ReceiverCallback {
 	}
 
 	@Override
-	public void doAction(Bundle data,String action) {
+	public void doAction(Bundle data, String action) {
 		// String response = data.getString(HttpService.KEY_JSON);
 		// Gson gson = new Gson();
 		switch (data.getInt(HttpService.KEY_REQUEST_CODE)) {
 		case HttpService.CREATE_GROUP_REQUEST_CODE:
-			Room.clearLastUpdatedTiming();
+			Group.clearLastUpdatedTiming();
 			HomeActivity.startHomeActivity(context);
 			break;
 		case HttpService.GROUP_LIST_REQUEST_CODE:
-			if(homeListFragment!=null && homeListFragment.isVisible()){
+			if (homeListFragment != null && homeListFragment.isVisible()) {
 				homeListFragment.refresh();
 			}
 		}
@@ -118,15 +111,11 @@ public class GroupController implements ReceiverCallback {
 	}
 
 	public void onResume() {
-		if (receiver != null && context != null) {
-			context.registerReceiver(receiver, receiver.intentFilter);
-		}
+		receiver.register();
 	}
 
 	public void onPause() {
-		if (receiver != null && context != null) {
-			context.unregisterReceiver(receiver);
-		}
+		receiver.unregister();
 	}
 
 	public void set(HomeListFragment homeListFragment) {

@@ -15,7 +15,7 @@ import com.schedulous.utility.HashTable;
 import com.schedulous.utility.TimeUtility;
 import com.schedulous.utility.server.HttpService;
 
-public class Room implements Comparable<Room> {
+public class Group implements Comparable<Group> {
 	public static final String URL_EXTENSION_GET = Common.SCHEDULOUS_URL
 			+ "/group/list";
 	public static final String KEY_LAST_QUERIED_TIMESTAMP_GROUP = "KEY_LAST_QUERIED_TIMESTAMP_GROUP";
@@ -25,7 +25,7 @@ public class Room implements Comparable<Room> {
 	public String creator_id;
 	public ArrayList<String> members;
 
-	public Room(Cursor cursor) {
+	public Group(Cursor cursor) {
 		group_id = cursor.getString(GroupTable.GROUP_ID);
 		group_name = cursor.getString(GroupTable.GROUP_NAME);
 		group_pic_url = cursor.getString(GroupTable.GROUP_PIC_URL);
@@ -59,12 +59,12 @@ public class Room implements Comparable<Room> {
 		GroupTable.save(this);
 	}
 
-	public static Room get(String group_id) {
+	public static Group get(String group_id) {
 		return GroupTable.getGroup(group_id);
 	}
 
-	public static ArrayList<Room> getAll() {
-		ArrayList<Room> groups = GroupTable.getAll();
+	public static ArrayList<Group> getAll() {
+		ArrayList<Group> groups = GroupTable.getAll();
 		Collections.sort(groups);
 		return groups;
 	}
@@ -80,7 +80,7 @@ public class Room implements Comparable<Room> {
 		GroupInfo gi = gson.fromJson(response, GroupInfo.class);
 		if (Common.SUCCESS.equals(gi.status)) {
 			ArrayList<String> new_people = new ArrayList<String>();
-			for (Room g : gi.groups) {
+			for (Group g : gi.groups) {
 				for (String group_member_id : g.members) {
 					if (User.get(group_member_id) == null) {
 						new_people.add(group_member_id);
@@ -96,11 +96,11 @@ public class Room implements Comparable<Room> {
 
 	static class GroupInfo {
 		String status;
-		ArrayList<Room> groups;
+		ArrayList<Group> groups;
 	}
 	
 	@Override
-	public int compareTo(Room another) {
+	public int compareTo(Group another) {
 		return group_name.compareToIgnoreCase(another.group_name);
 	}
 

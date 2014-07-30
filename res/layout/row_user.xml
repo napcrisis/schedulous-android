@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/row_height"
-    android:descendantFocusability="blocksDescendants" >
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="@dimen/default_margin" >
 
     <ImageView
         android:id="@+id/iv_profile_picture"
         android:layout_width="@dimen/display_picture_square"
         android:layout_height="@dimen/display_picture_square"
         android:layout_alignParentLeft="true"
-        android:layout_margin="@dimen/default_margin"
         android:contentDescription="@string/empty"
         android:src="@drawable/ic_profile_picture" />
 
@@ -18,16 +18,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/default_marginx2"
         android:layout_toRightOf="@id/iv_profile_picture"
         android:text="@string/sample" />
 
     <CheckBox
-        android:id="@+id/cb_check_list"
+        android:id="@+id/iv_check_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_marginx2"
+        android:button="@drawable/check_circle"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:visibility="gone" />
 
 </RelativeLayout>

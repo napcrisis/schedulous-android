@@ -1,24 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@color/white" >
 
     <EditText
-        android:id="@+id/et_group_name"
+        android:id="@+id/et_search_and_selected_people"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_margin="@dimen/default_margin"
-        android:hint="@string/group_name"
+        android:hint="@string/search_hint"
         android:inputType="text"
-        android:visibility="gone"
-        android:maxLength="20" />
+        android:maxLength="20"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_new_group"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/et_search_and_selected_people"
+        android:background="@drawable/bg_white_with_bottom_line"
+        android:drawableLeft="@drawable/ic_group_chat"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
+        android:padding="15dp"
+        android:text="@string/new_group" />
+
+    <LinearLayout
+        android:id="@+id/ll_confirmation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_new_group"
+        android:layout_margin="@dimen/default_marginx2"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageView
+            android:id="@+id/iv_profile_picture"
+            android:layout_width="@dimen/logo_height"
+            android:layout_height="@dimen/logo_height"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_group_picture" />
+
+        <TextView
+            android:id="@+id/tv_group_photo_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/add_group_photo" />
+
+        <EditText
+            android:id="@+id/et_group_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_marginx2"
+            android:hint="@string/group_name" />
+    </LinearLayout>
 
     <fragment
         android:id="@+id/fragment_userlist"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/et_group_name"
+        android:layout_below="@id/ll_confirmation"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
         class="com.schedulous.contacts.UserListFragment" />
 
 </RelativeLayout>

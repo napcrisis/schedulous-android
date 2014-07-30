@@ -4,8 +4,11 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 
 import com.schedulous.contacts.ContactController;
+import com.schedulous.utility.TypeFaceSpan;
 
 public class HomeActivity extends ParentActivity {
 
@@ -14,10 +17,14 @@ public class HomeActivity extends ParentActivity {
 		super.onCreate(savedInstanceState);
 		ContactController.query(this);
 		setContentView(R.layout.activity_fragment_holder);
-		
-		getActionBar().setLogo(R.drawable.ic_header);
-		getActionBar().setTitle(R.string.empty);
-		
+		SpannableString title = new SpannableString(getResources().getString(
+				R.string.app_name));
+		title.setSpan(new TypeFaceSpan(this, "Existence-Light.otf"), 0, title.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		// Update the action bar title with the TypefaceSpan instance
+		getActionBar().setIcon(android.R.color.transparent);
+		getActionBar().setTitle(title);
+
 		if (getFragmentManager().findFragmentById(R.id.fragment_container) == null) {
 			Fragment fragment = new HomeListFragment();
 			getFragmentManager().beginTransaction()

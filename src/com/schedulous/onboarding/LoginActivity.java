@@ -1,113 +1,66 @@
 package com.schedulous.onboarding;
 
+import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.schedulous.R;
-import com.schedulous.contacts.ContactController;
 
 public class LoginActivity extends Activity implements LoginUI {
-	private static final String TAG = LoginActivity.class.getSimpleName();
+	private static final String SINGAPORE_CC_PREFIX = "+65";
 	private OnClickListener button_listener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			boolean showMobileField = true;
 			switch (view.getId()) {
-			case R.id.ib_back:
-				showMobileField = false;
-			case R.id.tv_register:
-				register.startAnimation(showMobileField ? mFadeOut : mFadeIn);
-				register.setVisibility(showMobileField ? View.GONE
-						: View.VISIBLE);
-				mobile_field_container.startAnimation(showMobileField ? mFadeIn
-						: mFadeOut);
-				mobile_field_container
-						.setVisibility(showMobileField ? View.VISIBLE
-								: View.GONE);
-				bottom_text.setVisibility(showMobileField ? View.GONE
-						: View.VISIBLE);
-				break;
-			case R.id.tv_send:
+			case R.id.tv_action_button:
 				if (isVerifyMode) {
-					controller.verify_number(mobile_field.getText().toString());
+					controller.verify_number(user_input.getText().toString());
 				} else {
-					String country_code = mobile_country_code.getText()
-							.toString();
-					String mobile_number = mobile_field.getText().toString();
+					String mobile_number = user_input.getText().toString();
 					try {
-						controller.send_number(country_code + mobile_number);
+						controller.send_number(SINGAPORE_CC_PREFIX
+								+ mobile_number);
 						Toast.makeText(
 								LoginActivity.this,
-								"Sending message to " + country_code + " "
-										+ mobile_number, Toast.LENGTH_LONG)
-								.show();
+								"Sending message to " + SINGAPORE_CC_PREFIX
+										+ " " + mobile_number,
+								Toast.LENGTH_LONG).show();
 					} catch (Exception e) {
 						Toast.makeText(LoginActivity.this, e.getMessage(),
 								Toast.LENGTH_LONG).show();
 					}
 				}
-				view.setVisibility(View.INVISIBLE);
+				view.setEnabled(false);
 				break;
 			}
 		}
 	};
-	private OnKeyListener mobile_field_listener = new OnKeyListener() {
-		@Override
-		public boolean onKey(View view, int arg1, KeyEvent arg2) {
-			String number = ((EditText) view).getText().toString();
-			boolean showSendButton = number.length() > 7;
-			if (showSendButton) {
-				try {
-					ContactController.make_international_number_from_singapore_number(mobile_country_code
-									.getText() + number);
-				} catch (Exception e) {
-					Toast.makeText(LoginActivity.this, e.getMessage(),
-							Toast.LENGTH_LONG).show();
-					showSendButton = false;
-				}
-			}
-			if (isVerifyMode) {
-				showSendButton = number.length() > 3;
-			}
-			if (!send.isShown() && showSendButton) {
-				send.startAnimation(mFadeIn);
-			}
-			send.setVisibility(showSendButton ? View.VISIBLE : View.INVISIBLE);
-			return false;
-		}
-	};
 	private LoginController controller;
-
-	private Animation mFadeIn;
-	private Animation mFadeOut;
 	private boolean isVerifyMode;
 
-	private TextView register;
-	private TextView mobile_country_code;
-	private EditText mobile_field;
-	private TextView send;
-	private TextView bottom_text;
-	private ImageButton back;
-	private LinearLayout mobile_field_container;
+	private EditText user_input;
+	private TextView next;
+	private TextView title;
+	private ImageView logo;
+	private LinearLayout interfaceContainer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.v(TAG, "oncreate");
 		setContentView(R.layout.onboard_login_activity);
-		getActionBar().hide();
 		controller = new LoginController(getApplicationContext(),
 				LoginActivity.this);
 		isVerifyMode = false;
@@ -116,33 +69,34 @@ public class LoginActivity extends Activity implements LoginUI {
 			return;
 		}
 
-		mobile_field_container = (LinearLayout) findViewById(R.id.ll_mobile_field_container);
-		register = (TextView) findViewById(R.id.tv_register);
-		mobile_country_code = (TextView) findViewById(R.id.tv_mobile_country_code);
-		mobile_field = (EditText) findViewById(R.id.et_mobile_number);
-		send = (TextView) findViewById(R.id.tv_send);
-		bottom_text = (TextView) findViewById(R.id.tv_bottom_slider_text);
-		back = (ImageButton) findViewById(R.id.ib_back);
+		interfaceContainer = (LinearLayout) findViewById(R.id.ll_interface_container);
+		user_input = (EditText) findViewById(R.id.et_user_input);
+		next = (TextView) findViewById(R.id.tv_action_button);
+		title = (TextView) findViewById(R.id.tv_title);
+		logo = (ImageView) findViewById(R.id.tv_logo);
 
-		register.setOnClickListener(button_listener);
-		back.setOnClickListener(button_listener);
-		send.setOnClickListener(button_listener);
-		mobile_field.setOnKeyListener(mobile_field_listener);
+		next.setOnClickListener(button_listener);
 
-		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
-		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		Typeface deliciousheavy = Typeface.createFromAsset(
+				getApplicationContext().getAssets(),
+				"fonts/Delicious-Heavy.otf");
+		Typeface deliciousroman = Typeface.createFromAsset(
+				getApplicationContext().getAssets(),
+				"fonts/Delicious-Roman.otf");
+
+		title.setTypeface(deliciousheavy);
+		user_input.setTypeface(deliciousroman);
+		next.setTypeface(deliciousroman);
 	}
 
 	@Override
 	public void completeSending() {
-		mobile_country_code.setVisibility(View.GONE);
-		mobile_field.setText("");
-		mobile_field.setHint(R.string.verification_code);
-		send.setText(R.string.verify);
+		user_input.setText("");
+		user_input.setHint(R.string.verification_code);
 
 		Toast.makeText(this, "Awaiting message", Toast.LENGTH_LONG).show();
 		isVerifyMode = true;
-		send.setVisibility(View.VISIBLE);
+		next.setEnabled(true);
 		// TODO: loading icon & start broadcast receiver
 	}
 
@@ -160,8 +114,46 @@ public class LoginActivity extends Activity implements LoginUI {
 
 	@Override
 	public void receivedVerificationCode(String code) {
-		mobile_field.setText(code);
-		send.performClick();
+		user_input.setText(code);
+		next.performClick();
 	}
 
+	public static void ImageViewAnimatedChange(Context c, final ImageView v,
+			final int new_image) {
+		final Animation anim_out = AnimationUtils.loadAnimation(c,
+				android.R.anim.fade_out);
+		final Animation anim_in = AnimationUtils.loadAnimation(c,
+				android.R.anim.fade_in);
+		anim_out.setAnimationListener(new AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				v.setImageResource(new_image);
+				v.setLayoutParams(new LinearLayout.LayoutParams(
+						LayoutParams.MATCH_PARENT, 300));
+				anim_in.setAnimationListener(new AnimationListener() {
+					@Override
+					public void onAnimationStart(Animation animation) {
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation) {
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation) {
+					}
+				});
+				v.startAnimation(anim_in);
+			}
+		});
+		v.startAnimation(anim_out);
+	}
 }

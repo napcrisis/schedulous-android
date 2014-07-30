@@ -17,12 +17,11 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.schedulous.contacts.ContactController;
 import com.schedulous.contacts.User;
-import com.schedulous.group.Room;
+import com.schedulous.group.Group;
 import com.schedulous.utility.CallbackReceiver;
 import com.schedulous.utility.Common;
 import com.schedulous.utility.OnCompletionCall;
@@ -172,13 +171,15 @@ public class HttpService extends IntentService implements OnCompletionCall {
 					User.saveResponse(response, getApplicationContext());
 					break;
 				case CREATE_GROUP_REQUEST_CODE:
-					Room.queryServer(getApplicationContext());
-					startCallBack(response, requestCode);
+					Group.queryServer(getApplicationContext());
+					CallbackReceiver.notify(getApplicationContext(), response,
+							requestCode);
 					break;
 				case GROUP_LIST_REQUEST_CODE:
-					Room.saveResponse(response, getApplicationContext());
+					Group.saveResponse(response, getApplicationContext());
 				default:
-					startCallBack(response, requestCode);
+					CallbackReceiver.notify(getApplicationContext(), response,
+							requestCode);
 					break;
 				}
 			} else {
@@ -188,16 +189,5 @@ public class HttpService extends IntentService implements OnCompletionCall {
 			// TODO: parse failed, add to crashlytics
 			return;
 		}
-	}
-
-	private void startCallBack(String response, int requestCode) {
-		Intent broadcastIntent = new Intent();
-		broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-		broadcastIntent.setAction(CallbackReceiver.RECEIVER_CODE);
-		Bundle data = new Bundle();
-		data.putString(KEY_JSON, response);
-		data.putInt(KEY_REQUEST_CODE, requestCode);
-		broadcastIntent.putExtras(data);
-		sendBroadcast(broadcastIntent);
 	}
 }

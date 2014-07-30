@@ -28,20 +28,20 @@ public class GroupTable extends MainDatabase {
 		getDatabase().delete(TABLE_NAME, null, null);
 	}
 
-	static Room getGroup(String group_id) {
+	static Group getGroup(String group_id) {
 		Cursor cursor = getDatabase().query(TABLE_NAME, ALL_COLUMNS,
 				ALL_COLUMNS[GROUP_ID] + "=" + group_id, null, null, null, null);
 		cursor.moveToFirst();
 
-		Room group = null;
+		Group group = null;
 		if (cursor.getCount() != 0) {
-			group = new Room(cursor);
+			group = new Group(cursor);
 		}
 		cursor.close();
 		return group;
 	}
 
-	static void save(Room group) {
+	static void save(Group group) {
 		if (exist(group.group_id)) {
 			String where = ALL_COLUMNS[GROUP_ID] + "=" + group.group_id;
 			getDatabase().update(TABLE_NAME, group.convertToContentValues(),
@@ -63,14 +63,14 @@ public class GroupTable extends MainDatabase {
 		}
 	}
 
-	static ArrayList<Room> getAll() {
+	static ArrayList<Group> getAll() {
 		Cursor cursor = getDatabase().query(TABLE_NAME, ALL_COLUMNS, null,
 				null, null, null, null);
 		cursor.moveToFirst();
-		ArrayList<Room> temp = new ArrayList<Room>();
+		ArrayList<Group> temp = new ArrayList<Group>();
 		if (cursor.getCount() != 0) {
 			while (!cursor.isAfterLast()){
-				temp.add(new Room(cursor));
+				temp.add(new Group(cursor));
 				cursor.moveToNext();
 			}
 		}

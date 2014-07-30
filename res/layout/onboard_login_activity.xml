@@ -1,76 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rl_background"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white" >
+    android:background="@drawable/bg_login"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="20dp" >
 
     <ImageView
-        android:id="@+id/iv_logo"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/logo_height"
-        android:layout_alignParentTop="true"
+        android:id="@+id/tv_logo"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
         android:contentDescription="@string/empty"
-        android:padding="@dimen/logo_padding"
-        android:src="@drawable/ic_logo_title" />
-
-    <TextView
-        android:id="@+id/tv_bottom_slider_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/sample" />
-
-    <TextView
-        android:id="@+id/tv_register"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/tv_bottom_slider_text"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/res_colored_button_red"
-        android:text="@string/register" />
+        android:src="@drawable/ic_schedulous_logo" />
 
     <LinearLayout
-        android:id="@+id/ll_mobile_field_container"
-        android:layout_width="wrap_content"
+        android:id="@+id/ll_interface_container"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/iv_logo"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal"
-        android:visibility="gone" >
-
-        <ImageButton
-            android:id="@+id/ib_back"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_margin="@dimen/default_margin"
-            android:background="@color/white"
-            android:contentDescription="@string/empty"
-            android:src="@drawable/ic_action_back" />
+        android:layout_marginTop="10dp"
+        android:background="@drawable/white_theme_button"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp" >
 
         <TextView
-            android:id="@+id/tv_mobile_country_code"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/mobile_default_country_code" />
+            android:layout_marginBottom="20dp"
+            android:text="@string/getstarted"
+            android:textSize="25dp"
+            android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/et_mobile_number"
-            android:layout_width="@dimen/mobile_edittext_width"
+            android:id="@+id/et_user_input"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
             android:hint="@string/mobile_hint"
-            android:inputType="number"
-            android:maxLength="8" />
+            android:inputType="number" />
 
         <TextView
-            android:id="@+id/tv_send"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_action_button"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/res_colored_button_red"
-            android:text="@string/send"
-            android:visibility="invisible" />
+            android:background="@drawable/theme_button"
+            android:gravity="center"
+            android:text="@string/next" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
